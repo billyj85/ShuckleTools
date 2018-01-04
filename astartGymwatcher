@@ -1,0 +1,4 @@
+nohup python gymwatcher.py -cf agymwatcher.ini 2>&1 >lagymwatcher.log &
+echo $! > agymwatcher.pid
+
+

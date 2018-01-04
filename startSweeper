@@ -1,0 +1,4 @@
+nohup python sweeper.py -cf sweeper.ini $@ 2>&1 >lsweeper.log &
+echo $! > sweeper.pid
+
+

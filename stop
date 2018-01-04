@@ -1,0 +1,2 @@
+kill `cat gymwatcher.pid`
+rm -f gymwatcher.pid

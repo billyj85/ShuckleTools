@@ -1,0 +1,2 @@
+nohup python fnords.py -cf fnords.ini >lfnords.log &
+echo $! >.fnords.pid

@@ -1,0 +1,5 @@
+#!/bin/bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+first_arg="$1"
+shift
+python3 $DIR/../accountloader.py -cf $DIR/../../accountmanager.ini --accountcsv=$first_arg $@

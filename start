@@ -1,0 +1,4 @@
+nohup python gymscanner.py 2>&1 >log.txt &
+echo $! > scanner.pid
+
+

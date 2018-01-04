@@ -1,0 +1,4 @@
+#!/bin/bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+nohup python3 $DIR/../raidwatch.py -cf $DIR/../../raidwatch.ini >$DIR/../lraidwatch.log &
+echo $! >$DIR/.raidwatch.pid

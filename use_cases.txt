@@ -1,0 +1,20 @@
+last-allocated flag is ordering. Future date will almost never be used.
+
+Dont need blind check. Need "account alloctor"
+    - give me 100 L30 accounts, name system-id "xyz". Maybe allocation timeline
+    - overwrite accounts.csv, dump pickle file. Old accounts.csv is garbage
+
+Test-cases
+-----------
+3500 stops with lucky egg. Benchmark for reference.
+- initial/final xp. Pokestop timings. Maybe write spin-times to file at end of run ?
+- start time/end time.
+
+Run only 1 batch.
+
+Stage 1:
+
+3499 stops with lucky egg non-stop
+30 minutes
+
+- Sette lucky egg med lucky egg gir slow down man.

@@ -30,7 +30,7 @@ log = logging.getLogger("pogoserv")
 class PogoService(object):
 
     def __init__(self):
-        self.log = logging.logging.getLogger("pogoserv")
+        self.log = logging.getLogger("pogoserv")
 
     async def do_gym_get_info(self, position, gym_position, gym_id):
         raise NotImplementedError("This is an abstract method.")

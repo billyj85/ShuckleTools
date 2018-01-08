@@ -30,7 +30,7 @@ log = logging.getLogger("pogoserv")
 class PogoService(object):
 
     def __init__(self):
-        self.log = logging.LoggerAdapter(logging.getLogger("pogoserv"), {'worker_name': self.name()})
+        self.log = logging.logging.getLogger("pogoserv")
 
     async def do_gym_get_info(self, position, gym_position, gym_id):
         raise NotImplementedError("This is an abstract method.")
@@ -237,6 +237,7 @@ class Account2(PogoService):
     def __init__(self, username, password, auth_service, args, search_interval,
                  rest_interval, hash_generator, login_hash_generator, ptc_proxy_supplier, niantic_proxy_supplier, db_data, account_manager):
         PogoService.__init__(self)
+        self.log = logging.LoggerAdapter(logging.getLogger("pogoserv"), {'worker_name': username})
         self.ptc_proxy_supplier = ptc_proxy_supplier
         self.niantic_proxy_supplier = niantic_proxy_supplier
         self.current_ptc_proxy = None

@@ -111,11 +111,11 @@ class CatchManager(object):
     async def do_catch_moving(self, map_objects, player_pos, next_pos, pos_idx, catch_condition, broadcast=True):
         all_caught = {}
         if not self.is_within_catch_limit():
-            log.info(u"Catch limit {} exceeeded, not catching any more".format(str(self.catch_limit)))
+            self.worker.log.info(u"Catch limit {} exceeeded, not catching any more".format(str(self.catch_limit)))
             return
         catch_list = catchable_pokemon_by_distance(map_objects, next_pos)
         names = pokemon_names([x[1] for x in catch_list])
-        log.info(u"{} pokemon in map_objects: {}".format(str(len(catch_list)), names))
+        self.worker.log.info(u"{} pokemon in map_objects: {}".format(str(len(catch_list)), names))
         while len(catch_list) > 0:
             to_catch = catch_list[0][1]
             # print str(to_catch)
@@ -131,7 +131,7 @@ class CatchManager(object):
             will_catch = (catch_condition.catch_anything or unseen_catch or candy_catch or candy_12_catch or candy_50_catch)
 
             if encountered_previously:
-                log.info(u"{} {} encountered previously".format(str(pokemon_name(pokemon_id)), str(encounter_id)))
+                self.worker.log.info(u"{} {} encountered previously".format(str(pokemon_name(pokemon_id)), str(encounter_id)))
             elif will_catch:
                 if broadcast and catch_condition.is_candy_pokemon(pokemon_id):
                     self.catch_feed.append(player_pos, to_catch, pos_idx)
@@ -144,16 +144,16 @@ class CatchManager(object):
                 if on_other_side:
                     available_mobility = self.travel_time.meters_available_right_now()
                     actual_meters = min(available_mobility, player_distance_to_next_position)
-                    log.info(u"Moving closer {} metres. {} meters_available right now".format(str(actual_meters),
+                    self.worker.log.info(u"Moving closer {} metres. {} meters_available right now".format(str(actual_meters),
                                                                                              str(available_mobility)))
                     player_pos = move_towards(player_pos, next_pos, actual_meters)
                 if pokemon_distance_to_next_position < player_distance_to_next_position:
                     m_to_move = player_distance_to_next_position - pokemon_distance_to_next_position
                     available_mobility = self.travel_time.meters_available_right_now()
                     actual_meters = min(available_mobility, m_to_move)
-                    log.info(u"player_distance_to_next_position={},pokemon_distance_to_next_position={}".format(
+                    self.worker.log.info(u"player_distance_to_next_position={},pokemon_distance_to_next_position={}".format(
                         str(player_distance_to_next_position), str(pokemon_distance_to_next_position)))
-                    log.info(u"Could move towards next position {} meters. {} meters_available, {}m by pokemon!".format(
+                    self.worker.log.info(u"Could move towards next position {} meters. {} meters_available, {}m by pokemon!".format(
                         str(actual_meters), str(available_mobility), str(m_to_move)))
                     player_pos = move_towards(player_pos, next_pos, actual_meters)
 
@@ -161,7 +161,7 @@ class CatchManager(object):
                     await self.worker.do_get_map_objects(player_pos)
 
                 self.processed_encounters.add(encounter_id)  # leaks memory. fix todo
-                log.info(u"Catching {} because catch_all={} unseen={} candy_catch={} candy_12_catch={}".format(
+                self.worker.log.info(u"Catching {} because catch_all={} unseen={} candy_catch={} candy_12_catch={}".format(
                     pokemon_name(pokemon_id), str(catch_condition.catch_anything), str(unseen_catch), str(candy_catch),
                     str(candy_12_catch)))
                 caught = await self.catch_it(player_pos, to_catch, fast=True)
@@ -171,9 +171,9 @@ class CatchManager(object):
                     if isinstance(caught, numbers.Number):
                         all_caught[caught] = pokemon_id
                     else:
-                        log.warning("Did not caEtch because {}".format(str(caught)))
+                        self.worker.log.warning("Did not caEtch because {}".format(str(caught)))
             else:
-                log.info(u"{} {} will not catch, is_catch_anything={}, is_unseen_catch={}, is_candy_catch={}, is_candy12_catch={}".format(str(pokemon_name(pokemon_id)), str(encounter_id), str(catch_condition.catch_anything), str(unseen_catch), str(candy_catch), str(candy_12_catch)))
+                self.worker.log.info(u"{} {} will not catch, is_catch_anything={}, is_unseen_catch={}, is_candy_catch={}, is_candy12_catch={}".format(str(pokemon_name(pokemon_id)), str(encounter_id), str(catch_condition.catch_anything), str(unseen_catch), str(candy_catch), str(candy_12_catch)))
             del catch_list[0]
 
         self.pokemon_caught += len(all_caught)
@@ -260,7 +260,7 @@ class CatchManager(object):
         transfers = []
         for pid, pokemon_id in caught.items():
             candy = candy_.get(pokemon_id, 0)
-            log.info(u"{} candy availble for {}".format(str(candy), str(pokemon_id)))
+            self.worker.log.info(u"{} candy availble for {}".format(str(candy), str(pokemon_id)))
             if pokemon_id in self.candy12 and candy >= 12:
                 this_evolves += self.do_evolve(candy_, pid, pokemon_id, self.worker, self.fast)
             elif pokemon_id in self.candy25 and candy >= 25:
@@ -277,10 +277,10 @@ class CatchManager(object):
         evo = await worker.do_evolve_pokemon(pid)
         candy = candy_.get(pokemon_id, 0)
         if evo.result != 1:
-            log.warning(o
+            worker.log.warning(
                 u"Evolve status {}, {}({}) candy post-evolve {}".format(str(evo.result), pokemon_name(pokemon_id),
                                                                         str(pokemon_id), str(candy)))
-        log.info("Enqueing evolved {} for transfer, {} candy post-evolve {}".format(evo.evolved_pokemon_data.id,
+        worker.log.info("Enqueing evolved {} for transfer, {} candy post-evolve {}".format(evo.evolved_pokemon_data.id,
                                                                                     pokemon_name(pokemon_id),
                                                                                     str(candy)))
         if not fast:
@@ -301,10 +301,10 @@ class CatchManager(object):
             return caught
         else:
             if probability:
-                log.info(u"Encounter {} is too hard to catch {}, skipping".format(str(encounter_id), str(
+                self.worker.log.info(u"Encounter {} is too hard to catch {}, skipping".format(str(encounter_id), str(
                     probability.capture_probability)))
             else:
-                log.info(u"Encounter {} failed, skipping".format(str(encounter_id)))
+                self.worker.log.info(u"Encounter {} failed, skipping".format(str(encounter_id)))
 
 
 class CatchFeed(object):

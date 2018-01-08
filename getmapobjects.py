@@ -159,7 +159,7 @@ def is_discardable(worker,pokemon_id, pkmn, buddy_id):
     favorite_ = pkmn.get("favorite", 0) != 0
     deployed = has_value(pkmn, "deployed_fort_id")
     buddy = buddy_id == pokemon_id
-    worker.log.info(u"favorite={}, deployed={}, buddy={}, buddy_id={}, pokemon_id={}".format(str(favorite_), str(deployed),
+    worker.log.debug(u"favorite={}, deployed={}, buddy={}, buddy_id={}, pokemon_id={}".format(str(favorite_), str(deployed),
                                                                                      str(buddy_id), str(buddy_id),
                                                                                      str(pokemon_id)))
     return not favorite_ and not deployed and not buddy

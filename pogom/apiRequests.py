@@ -5,7 +5,7 @@ import datetime
 import logging
 
 from aiopogo.exceptions import HashingQuotaExceededException, HashingTimeoutException, UnexpectedHashResponseException, \
-    NianticOfflineException
+    NianticOfflineException, InvalidRPCException
 from aiopogo.hash_server import BadHashRequestException, HashingOfflineException
 from aiopogo.utilities import f2i
 from aiopogo import utilities as util
@@ -35,6 +35,11 @@ async def req_call_with_retries(req):
             if attempts > 5:
                 raise
             await asyncio.sleep(10 * attempts)
+        except InvalidRPCException as e:
+            log.warning("InvalidRPCException")
+            if attempts > 5:
+                raise
+            await asyncio.sleep(1.5 * attempts)
         attempts += 1
 
 

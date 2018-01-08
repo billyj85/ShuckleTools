@@ -12,6 +12,7 @@ from pogoservice import Account2
 from scannerutil import auth_service
 
 log = logging.getLogger(__name__)
+logging.LoggerAdapter(logging.getLogger("d.e.f"), {'worker_name': ''})
 
 
 class CommonAccountManager(object):

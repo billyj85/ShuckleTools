@@ -244,7 +244,7 @@ class Account2(PogoService):
         self.allocated = False
         self.username = username
         self.password = password
-        self.log = logging.LoggerAdapter(logging.getLogger("d.e.f"), {'worker_name': username})
+        self.log = logging.LoggerAdapter(logging.getLogger("pogoserv"), {'worker_name': username})
         self.auth_service = auth_service
         self.args = args
         self.search_interval = search_interval  # todo. use

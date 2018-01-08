@@ -40,10 +40,12 @@ def setup_logging(file_name=None):
     if file_name:
         fileHandler = logging.FileHandler(file_name)
         fileHandler.setFormatter(logFormatter)
+        fileHandler.addFilter(SystemLogFilter())
         rootLogger.addHandler(fileHandler)
 
     consoleHandler = logging.StreamHandler()
     consoleHandler.setFormatter(logFormatter)
+    consoleHandler.addFilter(SystemLogFilter())
     rootLogger.addHandler(consoleHandler)
 
     logging.getLogger("pgoapi").setLevel(logging.WARN)

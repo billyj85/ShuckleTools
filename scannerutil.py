@@ -25,7 +25,7 @@ def setup_logging(file_name=None):
     else:
         file_name += ".log"
 
-    fmt = "%(asctime)s [%(threadName)12s][%(module)13s][%(levelname)8s][%(relativeCreated)d] %(message)s"
+    fmt = "%(asctime)s [%(worker_name)12s][%(module)13s][%(levelname)8s][%(relativeCreated)d] %(message)s"
     logFormatter = logging.Formatter(fmt)
     rootLogger = logging.getLogger()
     rootLogger.setLevel(logging.INFO)

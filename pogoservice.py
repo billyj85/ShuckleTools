@@ -27,6 +27,7 @@ log = logging.getLogger("pogoserv")
 
 
 
+
 class PogoService(object):
     def __init__(self):
         raise NotImplementedError("This is an abstract method.")
@@ -243,6 +244,7 @@ class Account2(PogoService):
         self.allocated = False
         self.username = username
         self.password = password
+        self.log = logging.LoggerAdapter(logging.getLogger("d.e.f"), {'worker_name': username})
         self.auth_service = auth_service
         self.args = args
         self.search_interval = search_interval  # todo. use
@@ -321,7 +323,7 @@ class Account2(PogoService):
         return self.allocated
 
     def set_resting(self):
-        log.debug("{} being sent to rest for {} seconds".format(self.username, str(self.rest_interval)))
+        self.log.debug("{} being sent to rest for {} seconds".format(self.username, str(self.rest_interval)))
         self.rest_until = dt.now() + timedelta(seconds=self.rest_interval)
 
     def set_extra_resting(self):
@@ -340,7 +342,7 @@ class Account2(PogoService):
             self.current_niantic_proxy = self.niantic_proxy_supplier(None)
         else:
             self.current_niantic_proxy = None
-        log.info(u"Account {} ptc proxy {} nia proxy {}".format(self.username, self.current_ptc_proxy, self.current_niantic_proxy))
+        self.log.info(u"Account {} ptc proxy {} nia proxy {}".format(self.username, self.current_ptc_proxy, self.current_niantic_proxy))
 
     def tryallocate(self):
         if not self.allocated and not self.is_resting() and not self.is_banned():  # currently this is guarded by the lock in account manager
@@ -434,7 +436,7 @@ class Account2(PogoService):
             self.current_niantic_proxy = self.niantic_proxy_supplier(self.current_niantic_proxy)
 
             if self.current_niantic_proxy is not None:
-                log.info(u"Using NIANTIC proxy " + self.current_niantic_proxy)
+                self.log.info(u"Using NIANTIC proxy " + self.current_niantic_proxy)
                 self.pgoApi.proxy = self.current_ptc_proxy
 
     @staticmethod
@@ -586,7 +588,7 @@ class Account2(PogoService):
             if len(self.log) > 0:
                 msg += ', '.join(self.log)
                 self.log = []
-            log.info(msg)
+            self.log.info(msg)
 
     def has_position(self):
         return self.most_recent_position() and self.most_recent_position()[0]
@@ -784,30 +786,30 @@ class Account2(PogoService):
         # todo: this class should not be doing this logic
         spin_result = spin_response['FORT_SEARCH'].result
         if spin_result == 1:
-            log.debug('Successful Pokestop spin.')
+            self.log.debug('Successful Pokestop spin.')
             return spin_response
         elif spin_result == 2:
-            log.warning('Pokestop was not in range to spin.')
+            self.log.warning('Pokestop was not in range to spin.')
             return spin_response
         elif spin_result == 3:
-            log.warning('Failed to spin Pokestop {}. Has recently been spun.'.format(str(fort.id)))
+            self.log.warning('Failed to spin Pokestop {}. Has recently been spun.'.format(str(fort.id)))
             return spin_response
         elif spin_result == 4:
-            log.info('Failed to spin Pokestop. Inventory is full.')
+            self.log.info('Failed to spin Pokestop. Inventory is full.')
             return spin_response
         elif spin_result == 5:
-            log.warning('Maximum number of Pokestops spun for this day.')
+            self.log.warning('Maximum number of Pokestops spun for this day.')
             raise GaveUpApiAction("Poekstop limit reached")
         elif spin_result == 6:
-            log.warning('POI_INACCESSIBLE for spin pokestop')
+            self.log.warning('POI_INACCESSIBLE for spin pokestop')
             return spin_response
         else:
-            log.warning('Failed to spin a Pokestop. Unknown result %d.', spin_result)
+            self.log.warning('Failed to spin a Pokestop. Unknown result %d.', spin_result)
 
     async def do_collect_level_up(self, current_level):
         self.__update_proxies()
         await self.__login_if_needed()
-        log.debug("Getting level up reward")
+        self.log.debug("Getting level up reward")
         response_dict = await self.game_api_event(
             level_up_rewards(self.pgoApi, self.account_info()),
             "level_up_rewards {}".format(str(self.account_info()['level'])))
@@ -819,7 +821,7 @@ class Account2(PogoService):
                     .get('items_awarded', []))
 
             for item in data:
-                log.info('level_up_reward {}'.format(str(item)))
+                self.log.info('level_up_reward {}'.format(str(item)))
         return "OK"
 
     error_codes = {
@@ -859,10 +861,10 @@ class Account2(PogoService):
     async def do_use_lucky_egg(self):
         items_ = self.applied_items
         if 301 in items_ and items_[301] > datetime.now():
-            log.warning("Lucky egg already active, ignore request to use another")
+            self.log.warning("Lucky egg already active, ignore request to use another")
             return 3
 
-        log.info(u"{} using lucky egg".format(self.username))
+        self.log.info(u"{} using lucky egg".format(self.username))
         pokemon = await self.game_api_event(
             use_item_xp_boost(self.pgoApi, self.account_info()),
             "use_item_xp_boost")
@@ -881,9 +883,9 @@ class Account2(PogoService):
     async def do_use_incense(self):
         items_ = self.applied_items
         if 401 in items_ and items_[401] > datetime.now():
-            log.warning("Incense already active, ignore request to use another")
+            self.log.warning("Incense already active, ignore request to use another")
             return 2
-        log.info(u"{} using incense".format(self.username))
+            self.log.info(u"{} using incense".format(self.username))
         pokemon = await self.game_api_event(
             use_item_incense(self.pgoApi, self.account_info()),
             "use_item_incense")
@@ -900,7 +902,7 @@ class Account2(PogoService):
             add_fort_modifier_ = add_lure_response["ADD_FORT_MODIFIER"]
             return add_fort_modifier_.result
         except Exception as e:
-            log.warning('Exception while adding lure to Pokestop: %s', repr(e))
+            self.log.warning('Exception while adding lure to Pokestop: %s', repr(e))
             return False
 
     @staticmethod
@@ -915,11 +917,11 @@ class Account2(PogoService):
 
             recycle_inventory_item_ = responses['RECYCLE_INVENTORY_ITEM']
             if recycle_inventory_item_.result != 1:
-                log.warning("Failed to remove item {}, code {}", str(item_id), str(recycle_inventory_item_.result))
+                self.log.warning("Failed to remove item {}, code {}", str(item_id), str(recycle_inventory_item_.result))
             else:
                 return count
         except KeyError:  # todo align with error handling in general
-            log.warning("Failed to remove item {}", item_id)
+            self.log.warning("Failed to remove item {}", item_id)
 
 
 class Account3(Account2):

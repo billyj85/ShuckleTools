@@ -22,7 +22,7 @@ from requests.packages.urllib3.util.retry import Retry
 class SystemLogFilter(logging.Filter):
     def filter(self, record):
         if not hasattr(record, 'worker_name'):
-            record.user_id = '--'
+            record.worker_name = '--'
         return True
 
 def setup_logging(file_name=None):

@@ -12,12 +12,12 @@ from behaviours import beh_aggressive_bag_cleaning, discard_all_pokemon
 from catchmanager import CatchManager, CatchFeed, OneOfEachCatchFeed, Candy12Feed, NoOpFeed, CatchConditions
 from common_accountmanager import OutOfAccounts
 from getmapobjects import is_discardable, is_starter_pokemon, catchable_pokemon
-from hamburg import xp_route_1
-from hamburg import xp_route_2
 from levelup_tools import get_pos_to_use, exclusion_pokestops, CountDownLatch
 from management_errors import GaveUp
 from pogoservice import TravelTime, ApplicationBehaviour
 from pokestoproutesv2 import routes_p1, initial_130_stops, routes_p2, xp_p1, xp_p2
+from routes.hamburg_xp1 import xp_route_1
+from routes.hamburg_xp2 import xp_route_2
 from scannerutil import create_forced_update_check, pairwise
 from stopmanager import StopManager
 from workermanager import WorkerManager, PositionFeeder

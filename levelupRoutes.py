@@ -11,7 +11,7 @@ from levelup_tools import find_xp_route, write_gpx_route, distance_route_locs_m
 from mapelements import RouteElement
 from mapelement_tools import find_optimal_location, create_pokestop_model, create_spawnpoint_model
 
-dirname = os.path.dirname(os.path.realpath(sys.argv[0]))
+dirname = os.path.dirname(os.path.realpath(__file__))
 
 parser = basic_std_parser("pokestops")
 parser.add_argument('-k', '--gmaps-key',
@@ -89,5 +89,5 @@ def fence(name):
     return get_geofences(dirname + "/levelup_fences.txt", [name])
 
 def write_file(file_name, var_name, route_string):
-    with open("ShuckleTools/{}".format(file_name), "w") as text_file:
+    with open("{}/routes/{}".format(dirname, file_name), "w") as text_file:
         text_file.write("{} = {}\n".format(str(var_name), str(route_string)))

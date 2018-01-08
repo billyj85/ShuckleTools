@@ -5,7 +5,7 @@ import logging
 import random
 import time
 
-from aiopogo.exceptions import AuthException, NianticIPBannedException
+from aiopogo.exceptions import AuthException, NianticIPBannedException, BadRPCException
 
 from .apiRequests import (send_generic_request, AccountBannedException,
                           req_call_with_retries)
@@ -178,6 +178,8 @@ async def rpc_login_sequence(args, api, account, proceed):
 
         total_req += 1
         await asyncio.sleep(random.uniform(.53, 1.1))
+    except BadRPCException as bre:
+        raise AccountBannedException
     except AccountBannedException as abe:
         raise abe
     except Exception as e:

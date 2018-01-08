@@ -14,7 +14,8 @@ PyMySQL==0.7.5
 flask-cors==2.1.2
 flask-compress==1.3.0
 LatLon==1.0.1
-git+git://github.com/ZeChrales/aiopogo#egg=aiopogo
+git+https://github.com/ShuckleHQ/aiopogo.git@master#egg=aiopogo
+#git+git://github.com/ZeChrales/aiopogo#egg=aiopogo
 xxhash
 sphinx==1.4.5
 sphinx-autobuild==0.6.0

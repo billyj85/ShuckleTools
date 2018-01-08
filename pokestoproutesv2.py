@@ -1,5 +1,9 @@
-from hamburg import spawnpoint_route_1, spawnpoint_route_2, xp_route_1, xp_route_2, stop_route_initial
+from hamburg import stop_route_initial
 from mapelements import RouteElement
+from routes.hamburg_grind1 import spawnpoint_route_1
+from routes.hamburg_grind2 import spawnpoint_route_2
+from routes.hamburg_xp1 import xp_route_1
+from routes.hamburg_xp2 import xp_route_2
 
 initial_130_stops = {"hamburg": list(reversed(RouteElement.from_tuples(stop_route_initial)))}
 

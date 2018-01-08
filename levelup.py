@@ -70,7 +70,6 @@ add_geofence(parser)
 args = parser.parse_args()
 loop = asyncio.get_event_loop()
 setup_default_app(args, loop)
-log = logging.getLogger(__name__)
 
 lock = asyncio.Lock()
 num_completed = 0
@@ -117,7 +116,7 @@ async def next_worker():
 async def process_points(locations, xp_boost_phase, catch_feed, cm, sm, wm, travel_time, worker, phase,
                          catch_condition, first_time=None, receive_broadcasts=True, pos_index=0):
     first_loc = get_pos_to_use(locations[0])
-    log.info(u"First lof {}".format(str(first_loc)))
+    worker.log.info(u"First lof {}".format(str(first_loc)))
     map_objects = await wm.move_to_with_gmo(first_loc)
 
     num_pokes = len(worker.account_info().pokemons)
@@ -144,7 +143,7 @@ async def process_points(locations, xp_boost_phase, catch_feed, cm, sm, wm, trav
             sm.log_inventory()
 
         if do_extra_gmo_after_pokestops:
-            log.info(u"Wating an extra cycle after fast moves")
+            worker.log.info(u"Wating an extra cycle after fast moves")
             map_objects = await wm.get_map_objects(player_location)
 
         sm.log_status(egg_active, wm.has_egg, wm.egg_number, pos_index, phase)
@@ -169,7 +168,7 @@ async def process_points(locations, xp_boost_phase, catch_feed, cm, sm, wm, trav
                         enc_pos = encs[enc_id][0]
                 if not enc_id:
                     break
-                log.info(u"Dealing with nested location {}".format(str(enc_pos)))
+                worker.log.info(u"Dealing with nested location {}".format(str(enc_pos)))
                 await process_points([encs[enc_id][0], encs[enc_id][0]], xp_boost_phase, NoOpFeed(), cm, sm, wm,
                                      travel_time, worker, phase, catch_condition, receive_broadcasts=False,
                                      pos_index=pos_index)
@@ -229,7 +228,7 @@ async def levelup(thread_num, worker, global_catch_feed_, latch, is_forced_updat
     feeder = PositionFeeder(list(reversed(initial_pokestops))[:num_items], is_forced_update)
 
     if wm.player_level() < 8:
-        log.info(u"Doing initial pokestops PHASE")
+        worker.log.info(u"Doing initial pokestops PHASE")
 
         await process_points(feeder, False, candy_12_feed, cm, sm, wm, travel_time, worker, 1,
                              CatchConditions.initial_condition())
@@ -241,7 +240,7 @@ async def levelup(thread_num, worker, global_catch_feed_, latch, is_forced_updat
     #await latch.do_await()
 
 
-    log.info(u"Main grind PHASE 1")
+    worker.log.info(u"Main grind PHASE 1")
     wm.explain()
     cm.catch_feed = global_catch_feed_
     feeder = PositionFeeder(routes_p1[args.route], is_forced_update)
@@ -261,7 +260,7 @@ async def levelup(thread_num, worker, global_catch_feed_, latch, is_forced_updat
 
     sm.clear_state()
     cm.evolve_requirement = 90
-    log.info(u"Main grind PHASE 2")
+    worker.log.info(u"Main grind PHASE 2")
     wm.explain()
     cm.catch_feed = global_catch_feed_
     feeder = PositionFeeder(routes_p2[args.route], is_forced_update)
@@ -276,16 +275,16 @@ async def levelup(thread_num, worker, global_catch_feed_, latch, is_forced_updat
 
     if args.final_system_id:
         await db_set_system_id(worker.name(), args.final_system_id)
-        log.info(u"Transferred account {} to system-id {}".format(worker.name(), args.final_system_id))
+        worker.log.info(u"Transferred account {} to system-id {}".format(worker.name(), args.final_system_id))
 
-    log.info(u"Reached end of route with {} spins, going to rest".format(str(len(sm.spun_stops))))
+    worker.log.info(u"Reached end of route with {} spins, going to rest".format(str(len(sm.spun_stops))))
 
 
 async def startup():
     await account_manager.initialize(args.accountcsv, ())
     forced_update = create_forced_update_check(args)
     nthreads = int(args.thread_count)
-    log.info(u"Bot using {} threads".format(str(nthreads)))
+    worker.log.info(u"Bot using {} threads".format(str(nthreads)))
     latch = CountDownLatch(nthreads)
     for i in range(nthreads):
         asyncio.ensure_future(safe_levelup(i, global_catch_feed, latch, forced_update))

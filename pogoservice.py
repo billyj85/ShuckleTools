@@ -27,7 +27,6 @@ log = logging.getLogger("pogoserv")
 
 
 
-
 class PogoService(object):
     def __init__(self):
         raise NotImplementedError("This is an abstract method.")
@@ -283,7 +282,7 @@ class Account2(PogoService):
         self.remaining_codename_claims = None
         self.xp = None
         self.fail_eager = self.account_manager.replace_warned
-        self.log = []
+        self.log_items = []
         self.candy = {}
         self.applied_items = {}
         self.pgoApi = self.create_api(generate_device_info(identifier.encode("utf-8")))
@@ -585,10 +584,10 @@ class Account2(PogoService):
             time2 = time.time()
             ms_spent = int((time2 - time1) * 1000.0)
             msg = u"API " + msg + ", " + str(ms_spent) + "ms "
-            if len(self.log) > 0:
-                msg += ', '.join(self.log)
-                self.log = []
-            self.log.info(msg)
+            if len(self.log_items) > 0:
+                msg += ', '.join(self.log_items)
+                self.log_items = []
+            log.info(msg)
 
     def has_position(self):
         return self.most_recent_position() and self.most_recent_position()[0]

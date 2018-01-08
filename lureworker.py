@@ -134,7 +134,7 @@ class LureWorker(object):
         success = False
         while not success:
             try:
-                login_result = worker.login(pos, self.proceed)
+                login_result = await worker.login(pos, self.proceed)
                 if login_result:
                     success = True
                 else:

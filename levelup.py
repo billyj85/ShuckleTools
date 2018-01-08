@@ -202,13 +202,13 @@ async def initial_stuff(feeder, wm, cm, worker):
     wm.explain()
     inv_pokemon = worker.account_info().pokemons
     buddy_id=worker.account_info()["buddy"]
-    log.info(u"Byddy id is {}".format(str(buddy_id)))
-    nonfavs = [(id_,pokemon) for id_,pokemon in inv_pokemon.items() if is_discardable(id_,pokemon, buddy_id) and not is_starter_pokemon(pokemon)]
-    log.info(u"Transferring all pokemon that cant be evolved, considering {} pokemons".format(str(len(nonfavs))))
+    worker.log.info(u"Byddy id is {}".format(str(buddy_id)))
+    nonfavs = [(id_,pokemon) for id_,pokemon in inv_pokemon.items() if is_discardable(worker, id_,pokemon, buddy_id) and not is_starter_pokemon(pokemon)]
+    worker.log.info(u"Transferring all pokemon that cant be evolved, considering {} pokemons".format(str(len(nonfavs))))
     for p_id,pokemon in nonfavs:
         pokemon_id = pokemon["pokemon_id"]
         cm.process_evolve_transfer_item(p_id, pokemon_id)
-    log.info(u"Evolve-map {}".format(str(cm.evolve_map)))
+        worker.log.info(u"Evolve-map {}".format(str(cm.evolve_map)))
     await cm.do_transfers()
 
 

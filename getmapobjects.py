@@ -139,7 +139,7 @@ def inventory_pokemon(response):
 def inventory_discardable_pokemon(worker):
     inv_pokemon = worker.account_info().pokemons
     buddy_id = worker.account_info()["buddy"]
-    nonfavs = [id_ for id_, pokemon in inv_pokemon.items() if is_discardable(id_, pokemon, buddy_id)]
+    nonfavs = [id_ for id_, pokemon in inv_pokemon.items() if is_discardable(worker, id_, pokemon, buddy_id)]
     return nonfavs
 
 
@@ -155,11 +155,11 @@ def pokemon_by_uid(map_objects, uid):
     return matchin
 
 
-def is_discardable(pokemon_id, pkmn, buddy_id):
+def is_discardable(worker,pokemon_id, pkmn, buddy_id):
     favorite_ = pkmn.get("favorite", 0) != 0
     deployed = has_value(pkmn, "deployed_fort_id")
     buddy = buddy_id == pokemon_id
-    log.info(u"favorite={}, deployed={}, buddy={}, buddy_id={}, pokemon_id={}".format(str(favorite_), str(deployed),
+    worker.log.info(u"favorite={}, deployed={}, buddy={}, buddy_id={}, pokemon_id={}".format(str(favorite_), str(deployed),
                                                                                      str(buddy_id), str(buddy_id),
                                                                                      str(pokemon_id)))
     return not favorite_ and not deployed and not buddy

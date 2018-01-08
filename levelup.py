@@ -229,7 +229,7 @@ async def levelup(thread_num, worker, global_catch_feed_, latch, is_forced_updat
     feeder = PositionFeeder(list(reversed(initial_pokestops))[:num_items], is_forced_update)
 
     if wm.player_level() < 8:
-        log.info(u"Doing initial pokestops PHASE", worker_name=worker.name())
+        log.info(u"Doing initial pokestops PHASE")
 
         await process_points(feeder, False, candy_12_feed, cm, sm, wm, travel_time, worker, 1,
                              CatchConditions.initial_condition())
@@ -241,7 +241,7 @@ async def levelup(thread_num, worker, global_catch_feed_, latch, is_forced_updat
     #await latch.do_await()
 
 
-    log.info(u"Main grind PHASE 1", worker_name=worker.name())
+    log.info(u"Main grind PHASE 1")
     wm.explain()
     cm.catch_feed = global_catch_feed_
     feeder = PositionFeeder(routes_p1[args.route], is_forced_update)
@@ -261,7 +261,7 @@ async def levelup(thread_num, worker, global_catch_feed_, latch, is_forced_updat
 
     sm.clear_state()
     cm.evolve_requirement = 90
-    log.info(u"Main grind PHASE 2", worker_name=worker.name())
+    log.info(u"Main grind PHASE 2")
     wm.explain()
     cm.catch_feed = global_catch_feed_
     feeder = PositionFeeder(routes_p2[args.route], is_forced_update)

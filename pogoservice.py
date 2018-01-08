@@ -126,6 +126,7 @@ class DelegatingPogoService(PogoService):
     def __init__(self, target):
         PogoService.__init__(self)
         self.target = target
+        self.log = target.log
 
     def find_account_replacer(self):
         trgt = self.target

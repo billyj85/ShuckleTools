@@ -35,6 +35,7 @@ def setup_logging(file_name=None):
     logFormatter = logging.Formatter(fmt)
     rootLogger = logging.getLogger()
     rootLogger.setLevel(logging.INFO)
+    rootLogger.addFilter( SystemLogFilter())
 
     if file_name:
         fileHandler = logging.FileHandler(file_name)
@@ -44,7 +45,6 @@ def setup_logging(file_name=None):
     consoleHandler = logging.StreamHandler()
     consoleHandler.setFormatter(logFormatter)
     rootLogger.addHandler(consoleHandler)
-    rootLogger.addFilter( SystemLogFilter())
 
     logging.getLogger("pgoapi").setLevel(logging.WARN)
     logging.getLogger("connectionpool").setLevel(logging.WARN)

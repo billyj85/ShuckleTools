@@ -196,7 +196,10 @@ class LureWorker(object):
         first_time = True
         self.should_run(False)
 
-        while self.running and self.lure_counter.has_more_lures():
+        has_more_lures = self.lure_counter.has_more_lures()
+        if not has_more_lures:
+            log.warning(("No more lures in counter"))
+        while self.running and has_more_lures:
             route_to_use = route if first_time else self.sort_by_time(route)
 
             initial_pos = route_to_use[0]

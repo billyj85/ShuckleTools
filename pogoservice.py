@@ -425,7 +425,7 @@ class Account2(PogoService):
         if login and self.login_hash_generator:
             self.pgoApi.activate_hash_server(next(self.login_hash_generator), hash_endpoint=hash_endpoint)
         else:
-            self.pgoApi.activate_hash_server(next(self.hash_generator))
+            self.pgoApi.activate_hash_server(next(self.hash_generator), hash_endpoint=hash_endpoint)
 
         if self.ptc_proxy_supplier is not None:
             self.current_ptc_proxy = self.ptc_proxy_supplier(self.current_ptc_proxy)

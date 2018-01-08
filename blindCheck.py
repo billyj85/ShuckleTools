@@ -59,12 +59,12 @@ async def safe_check_workers(workers, location_to_use, accounts_file):
         try:
             await check_worker(worker, location_to_use, accounts_file, args.use_account_db, args.login_only, proceed)
         except OutOfAccounts:
-            log.info("Worker done")
+            worker.log.info("Worker done")
             pass
         except GaveUp:
-            logging.error("Gave up worker {}".format(str(worker)))
+            worker.log.error("Gave up worker {}".format(str(worker)))
         except:
-            logging.exception("Outer worker catch block caught exception")
+            worker.log.exception("Outer worker catch block caught exception")
 
 
 

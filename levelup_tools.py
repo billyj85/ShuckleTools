@@ -31,6 +31,8 @@ class CountDownLatch(object):
 
 
 def get_pos_to_use(route_element):
+    if type(route_element) is tuple:
+        return route_element
     return route_element.coords
 
 

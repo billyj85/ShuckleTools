@@ -280,7 +280,7 @@ async def beh_safe_do_gym_scan(pogoservice, moves_generator):
     try:
         await beh_gym_scan(pogoservice, moves_generator, 0)
     except:
-        logging.exception("Outer worker catch block caught exception")
+        pogoservice.log.exception("Outer worker catch block caught exception")
 
 
 async def beh_gym_scan(pogoservice, moves_generator, delay):

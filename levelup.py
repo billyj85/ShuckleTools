@@ -91,13 +91,13 @@ async def safe_levelup(thread_num, global_catch_feed_, latch, forced_update_):
             if worker:
                 await levelup(thread_num, worker, global_catch_feed_, latch, forced_update_, fast_25=args.fast_levelup)
         except OutOfAccounts:
-            logging.info("No more accounts, exiting worker thread")
+            worker.log.info("No more accounts, exiting worker thread")
             return
         except GaveUp:
             logging.info("Gave UP, exiting")
             return
         except:
-            logging.exception("Outer worker catch block caught exception")
+            worker.log.exception("Outer worker catch block caught exception")
         finally:
             pass
             # await latch.count_down()

@@ -143,7 +143,7 @@ class LureWorker(object):
                     await asyncio.sleep(10)
                     retries += 1
             except Exception as ex:
-                log.info(u"Login had exception {}".format(str(type(ex).__name__)))
+                log.exception(u"Login had exception {}".format(str(type(ex).__name__)))
                 worker = wrap_account_no_replace(await self.account_manager.get_account(), self.account_manager)
                 worker.account_info().update_position(pos)
                 await asyncio.sleep(10)

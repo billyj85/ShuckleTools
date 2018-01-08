@@ -28,8 +28,9 @@ log = logging.getLogger("pogoserv")
 
 
 class PogoService(object):
+
     def __init__(self):
-        raise NotImplementedError("This is an abstract method.")
+        self.log = logging.LoggerAdapter(logging.getLogger("pogoserv"), {'worker_name': self.name()})
 
     async def do_gym_get_info(self, position, gym_position, gym_id):
         raise NotImplementedError("This is an abstract method.")
@@ -107,6 +108,15 @@ class PogoService(object):
     def game_api_log(self, msg, *args, **kwargs):
         log.info(msg, args, kwargs)
 
+    def log_info(self, msg, *args, **kwargs):
+        self.log.info(msg, args, kwargs)
+
+    def log_debug(self, msg, *args, **kwargs):
+        self.log.debug(msg, args, kwargs)
+
+    def log_error(self, msg, *args, **kwargs):
+        self.log.error(msg, args, kwargs)
+
 
 class DelegatingPogoService(PogoService):
     def do_claim_codename(self, name):
@@ -114,6 +124,7 @@ class DelegatingPogoService(PogoService):
 
     # noinspection PyMissingConstructor
     def __init__(self, target):
+        PogoService.__init__(self)
         self.target = target
 
     def find_account_replacer(self):
@@ -225,6 +236,7 @@ class Account2(PogoService):
     # noinspection PyMissingConstructor
     def __init__(self, username, password, auth_service, args, search_interval,
                  rest_interval, hash_generator, login_hash_generator, ptc_proxy_supplier, niantic_proxy_supplier, db_data, account_manager):
+        PogoService.__init__(self)
         self.ptc_proxy_supplier = ptc_proxy_supplier
         self.niantic_proxy_supplier = niantic_proxy_supplier
         self.current_ptc_proxy = None
@@ -587,7 +599,7 @@ class Account2(PogoService):
             if len(self.log_items) > 0:
                 msg += ', '.join(self.log_items)
                 self.log_items = []
-            log.info(msg)
+            self.log.info(msg)
 
     def has_position(self):
         return self.most_recent_position() and self.most_recent_position()[0]

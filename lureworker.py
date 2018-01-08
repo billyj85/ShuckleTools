@@ -4,7 +4,7 @@ import logging
 import os
 from threading import Lock
 
-from async_accountdbsql import db_consume_lures, db_set_warned, db_set_perm_banned
+from async_accountdbsql import db_consume_lures, db_set_warned, db_set_perm_banned, db_set_logged_in_stats
 from getmapobjects import pokstops_within_distance, pokestop_detail
 from inventory import egg_count, lure_count
 from luredbsql import lures, db_consume_lure

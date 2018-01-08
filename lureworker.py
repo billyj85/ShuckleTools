@@ -3,9 +3,8 @@ import datetime
 import logging
 import os
 from threading import Lock
-from time import sleep
 
-from async_accountdbsql import db_consume_lures, db_set_logged_in_stats, db_set_warned, db_set_perm_banned
+from async_accountdbsql import db_consume_lures, db_set_warned, db_set_perm_banned
 from getmapobjects import pokstops_within_distance, pokestop_detail
 from inventory import egg_count, lure_count
 from luredbsql import lures, db_consume_lure
@@ -116,13 +115,13 @@ class LureWorker(object):
             map_objects = await self.safe_get_map_objects(pos)
         return map_objects
 
-    def proceed(self, worker):
+    async def proceed(self, worker):
         info = worker.account_info()
         warning_ = info["warning"]
         level = info["level"]
         eggs = egg_count(worker)
         lures = lure_count(worker)
-        db_set_logged_in_stats(info.username, lures, eggs, level)
+        await db_set_logged_in_stats(info.username, lures, eggs, level)
         if warning_:
             db_set_warned(info,datetime.datetime.now())
         return True

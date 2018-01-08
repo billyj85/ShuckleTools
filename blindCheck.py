@@ -8,10 +8,6 @@
 import asyncio
 import datetime
 import logging
-from threading import Thread
-from time import sleep
-
-from queue import Queue
 
 from async_accountdbsql import db_set_logged_in_stats, db_set_warned, load_accounts_for_blindcheck
 from accounts3 import AsyncAccountManager
@@ -45,13 +41,13 @@ passwords = []
 cannot_be_seen_when_shadowbanned = can_not_be_seen()
 
 
-def proceed(worker):
+async def proceed(worker):
     info = worker.account_info()
     warning_ = info["warning"]
     level = info["level"]
     eggs = egg_count(worker)
     lures = lure_count(worker)
-    db_set_logged_in_stats(info.username, lures, eggs, level)
+    await db_set_logged_in_stats(info.username, lures, eggs, level)
     log.info("{} level {}, {} lures {} eggs".format(worker.name(), level, lures, eggs))
     if warning_:
         db_set_warned(info, datetime.datetime.now())

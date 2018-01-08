@@ -1,12 +1,10 @@
 import asyncio
 import datetime
 import logging
-import time
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from queue import Queue
 
-from async_accountdbsql import db_set_logged_in_stats, db_set_warned, db_set_perm_banned, \
+from async_accountdbsql import db_set_perm_banned, \
     db_set_temp_banned
 from accountmanager import args
 from accounts3 import AsyncAccountManager

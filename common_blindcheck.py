@@ -16,13 +16,13 @@ log = logging.getLogger(__name__)
 cannot_be_seen_when_shadowbanned = can_not_be_seen()
 
 
-def proceed(worker):
+async def proceed(worker):
     info = worker.account_info()
     warning_ = info["warning"]
     level = info["level"]
     eggs = egg_count(worker)
     lures = lure_count(worker)
-    db_set_logged_in_stats(info.username, lures, eggs, level)
+    await db_set_logged_in_stats(info.username, lures, eggs, level)
     log.info(u"{} level {}, {} lures {} eggs".format(worker.name(), level, lures, eggs))
     if warning_:
         db_set_warned(info, datetime.datetime.now())

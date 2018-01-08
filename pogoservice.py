@@ -308,7 +308,7 @@ class Account2(PogoService):
         self.rest_until = when
 
     def add_log(self, msg):
-        self.log.append(msg)
+        self.log_items.append(msg)
 
     def set_banned(self):
         self.banned = datetime.now()

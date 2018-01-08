@@ -19,13 +19,19 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
 
+class SystemLogFilter(logging.Filter):
+    def filter(self, record):
+        if not hasattr(record, 'worker_name'):
+            record.user_id = '--'
+        return True
+
 def setup_logging(file_name=None):
     if not file_name:
         file_name = "log.out"
     else:
         file_name += ".log"
 
-    fmt = "%(asctime)s [%(threadName)12s][%(module)13s][%(levelname)8s][%(relativeCreated)d] %(message)s"
+    fmt = "%(asctime)s [%(worker_name)12s][%(module)13s][%(levelname)8s][%(relativeCreated)d] %(message)s"
     logFormatter = logging.Formatter(fmt)
     rootLogger = logging.getLogger()
     rootLogger.setLevel(logging.INFO)
@@ -38,6 +44,7 @@ def setup_logging(file_name=None):
     consoleHandler = logging.StreamHandler()
     consoleHandler.setFormatter(logFormatter)
     rootLogger.addHandler(consoleHandler)
+    rootLogger.addFilter( SystemLogFilter())
 
     logging.getLogger("pgoapi").setLevel(logging.WARN)
     logging.getLogger("connectionpool").setLevel(logging.WARN)

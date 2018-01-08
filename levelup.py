@@ -284,7 +284,8 @@ async def startup():
     await account_manager.initialize(args.accountcsv, ())
     forced_update = create_forced_update_check(args)
     nthreads = int(args.thread_count)
-    worker.log.info(u"Bot using {} threads".format(str(nthreads)))
+    log = logging.getLogger(__name__)
+    log.info(u"Bot using {} threads".format(str(nthreads)))
     latch = CountDownLatch(nthreads)
     for i in range(nthreads):
         asyncio.ensure_future(safe_levelup(i, global_catch_feed, latch, forced_update))

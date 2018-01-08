@@ -207,7 +207,7 @@ async def initial_stuff(feeder, wm, cm, worker):
     for p_id,pokemon in nonfavs:
         pokemon_id = pokemon["pokemon_id"]
         cm.process_evolve_transfer_item(p_id, pokemon_id)
-        worker.log.info(u"Evolve-map {}".format(str(cm.evolve_map)))
+    worker.log.info(u"Evolve-map {}".format(str(cm.evolve_map)))
     await cm.do_transfers()
 
 

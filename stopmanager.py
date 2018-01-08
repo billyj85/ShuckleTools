@@ -1,13 +1,10 @@
 from datetime import datetime, timedelta
 
-import logging
 from aiopogo.hash_server import HashServer
 
 from behaviours import beh_aggressive_bag_cleaning, beh_spin_pokestop, beh_spin_nearby_pokestops
 from inventory import inventory
 from scannerutil import nice_number_2
-
-log = logging.getLogger(__name__)
 
 
 class StopManager(object):
@@ -42,10 +39,10 @@ class StopManager(object):
     async def spin_single_stop(self, map_objects, player_position, pokestop_id, exclusions):
         self.spins_at[(datetime.now().minute + 1) % 59] = 0
         if pokestop_id in exclusions:
-            log.info(u"Not spinning excluded stop {}".format(pokestop_id))
+            self.worker.log.info(u"Not spinning excluded stop {}".format(pokestop_id))
             return
         if pokestop_id in self.spun_stops:
-            log.info(u"Skipping stop {}, already spun".format(pokestop_id))
+            self.worker.log.info(u"Skipping stop {}, already spun".format(pokestop_id))
         spin_pokestop = await beh_spin_pokestop(self.worker, map_objects, player_position, pokestop_id)
         if spin_pokestop == 4:
             await beh_aggressive_bag_cleaning(self.worker)
@@ -57,7 +54,7 @@ class StopManager(object):
                 self.save_pokestops = True
                 self.increment_spin()
         else:
-            log.info(u"Spinning failed {}".format(str(spin_pokestop)))
+            self.worker.log.info(u"Spinning failed {}".format(str(spin_pokestop)))
 
     def increment_spin(self):
         self.spin_number += 1
@@ -78,7 +75,7 @@ class StopManager(object):
             rem = HashServer.status.get('remaining', 0)
             ratio = float(self.catch_manager.pokemon_caught) / len(self.spun_stops) if len(self.spun_stops) > 0 else 0
             xp_30min_ago = self.worker_manager.xp_30_minutes_ago()
-            log.info(u"P{}L{}, {}S/{}P//R{}, {}E/{}EW, {}XP/{}@30min{}{}, {}S@30min. idx={}, {} hash"
+            self.worker.log.info(u"P{}L{}, {}S/{}P//R{}, {}E/{}EW, {}XP/{}@30min{}{}, {}S@30min. idx={}, {} hash"
                      .format(str(phase), str(self.worker_manager.level), str(len(self.spun_stops)),
                              str(self.catch_manager.pokemon_caught), str(nice_number_2(ratio)),
                              str(self.catch_manager.evolves),
@@ -89,14 +86,14 @@ class StopManager(object):
 
     async def reached_limits(self):
         if len(self.spun_stops) > self.max_stops:
-            log.info(u"Reached target spins {}".format(str(len(self.spun_stops))))
+            self.worker.log.info(u"Reached target spins {}".format(str(len(self.spun_stops))))
             return True
         if await self.worker_manager.reached_target_level():
             return True
         return False
 
     def log_inventory(self):
-        log.info(u"Inventory:{}".format(str(inventory(self.worker))))
+        self.worker.log.info(u"Inventory:{}".format(str(inventory(self.worker))))
 
     def clear_state(self):
         self.spun_stops = set()

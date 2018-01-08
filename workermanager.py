@@ -31,6 +31,8 @@ class WorkerManager(object):
         self.initial_fast_egg = True
         self.first_egg = True
         self.egg_number = 0
+        self.log = logging.LoggerAdapter(logging.getLogger("pogoserv"), {'worker_name': worker.name()})
+
 
     def player_level(self):
         level_ = self.worker.account_info()["level"]
@@ -42,7 +44,7 @@ class WorkerManager(object):
         if seconds_between_locations > seconds_threshold:
             self.travel_time.set_fast_speed(is_fast_speed)
             seconds_between_locations = self.travel_time.time_to_location(next_pos)
-            log.info("{} seconds to next location using fast speed".format(str(seconds_between_locations)))
+            self.log.info("{} seconds to next location using fast speed".format(str(seconds_between_locations)))
             map_objects = None
             remaining_distance = equi_rect_distance_m(player_position, next_pos)
             while remaining_distance > 1:
@@ -50,7 +52,7 @@ class WorkerManager(object):
                 player_position = move_towards(player_position, next_pos, available)
                 map_objects = await self.get_map_objects(player_position)
                 num_pokemons = len(catchable_pokemon(map_objects))
-                log.info("Remaining distance is {}, {} meters available, {} pokemon at this pos".format(
+                self.log.info("Remaining distance is {}, {} meters available, {} pokemon at this pos".format(
                     str(remaining_distance), str(available), str(num_pokemons)))
                 if at_location:
                     await at_location(player_position, map_objects)
@@ -58,7 +60,7 @@ class WorkerManager(object):
             self.travel_time.use_slow_speed()
         else:
             if seconds_between_locations > 0.1:
-                log.info("{} seconds to next position {}".format(str(seconds_between_locations), str(next_pos)))
+                self.log.info("{} seconds to next position {}".format(str(seconds_between_locations), str(next_pos)))
             map_objects = await self.get_map_objects(next_pos)
         return map_objects
 
@@ -79,7 +81,7 @@ class WorkerManager(object):
     async def reached_target_level(self):
         self.level = await beh_handle_level_up(self.worker, self.level)
         if self.level >= int(self.target_level):
-            log.info("Reached target level {}, exiting thread".format(self.level))
+            self.log.info("Reached target level {}, exiting thread".format(self.level))
             return True
         return False
 
@@ -125,7 +127,7 @@ class WorkerManager(object):
         return egg_active
 
     def explain(self):
-        log.info("incenses={}, has_active_incense={}, next_incense={}, eggs={}, has_active_egg={}, next_egg={}".format(str(incense_count(self.worker)), str(self.has_active_incense()), str(self.next_incense), str(egg_count(self.worker)),str(self.has_active_lucky_egg()),str(self.next_egg)))
+        self.log.info("incenses={}, has_active_incense={}, next_incense={}, eggs={}, has_active_egg={}, next_egg={}".format(str(incense_count(self.worker)), str(self.has_active_incense()), str(self.next_incense), str(egg_count(self.worker)),str(self.has_active_lucky_egg()),str(self.next_egg)))
 
     def use_incense_if_ready(self):
         if has_incense(self.worker) and not self.has_active_incense() and not self.has_active_lucky_egg() and self.next_incense > datetime.now():
@@ -157,7 +159,7 @@ class PositionFeeder(object):
 
     def next(self):
         if self.is_forced_update.isSet():
-            log.info("Forced update, qutting")
+            self.log.info("Forced update, qutting")
             raise StopIteration
 
         if self.pos >= len(self.route_elements):

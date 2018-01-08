@@ -1,7 +1,7 @@
-from hamburg import stop_route_initial
 from mapelements import RouteElement
 from routes.hamburg_grind1 import spawnpoint_route_1
 from routes.hamburg_grind2 import spawnpoint_route_2
+from routes.hamburg_initial import stop_route_initial
 from routes.hamburg_xp1 import xp_route_1
 from routes.hamburg_xp2 import xp_route_2
 

@@ -449,7 +449,7 @@ class Account2(PogoService):
             self.current_niantic_proxy = self.niantic_proxy_supplier(self.current_niantic_proxy)
 
             if self.current_niantic_proxy is not None:
-                self.log.info(u"Using NIANTIC proxy " + self.current_niantic_proxy)
+                self.log.debug(u"Using NIANTIC proxy " + self.current_niantic_proxy)
                 self.pgoApi.proxy = self.current_ptc_proxy
 
     @staticmethod

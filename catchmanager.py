@@ -277,7 +277,7 @@ class CatchManager(object):
         evo = await worker.do_evolve_pokemon(pid)
         candy = candy_.get(pokemon_id, 0)
         if evo.result != 1:
-            log.warning(
+            log.warning(o
                 u"Evolve status {}, {}({}) candy post-evolve {}".format(str(evo.result), pokemon_name(pokemon_id),
                                                                         str(pokemon_id), str(candy)))
         log.info("Enqueing evolved {} for transfer, {} candy post-evolve {}".format(evo.evolved_pokemon_data.id,

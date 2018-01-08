@@ -84,7 +84,7 @@ class PokemonCatchWorker:
         self.catchsim_catch_wait_max = 2.1
         self.catchsim_flee_count = 3
         self.catchsim_flee_duration = 2
-        self.catchsim_berry_wait_min = 2
+        self.catchsim_berry_wait_min = 0,5
         self.catchsim_berry_wait_max = 2.1
         self.catchsim_changeball_wait_min = 0.3  # 2.0
         self.catchsim_changeball_wait_max = 0.3  # 2.1
@@ -96,7 +96,8 @@ class PokemonCatchWorker:
 
     async def _use_berry(self, berry_id, berry_count, encounter_id, catch_rate_by_ball, current_ball):
         # Delay to simulate selecting berry
-        await action_delay(self.catchsim_berry_wait_min, self.catchsim_berry_wait_max)
+        if not self.fast:
+            await action_delay(self.catchsim_berry_wait_min, self.catchsim_berry_wait_max)
         new_catch_rate_by_ball = []
 
         response_dict = await self.pogoservice.do_use_item_encounter(

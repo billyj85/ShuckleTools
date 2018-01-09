@@ -117,7 +117,7 @@ async def beh_clean_bag_with_limits(worker, limits, aggressive=False):
         result = await worker.do_recycle_inventory_item(item_id=item, count=count)
         if result:
             removed += count
-        worker.log.info(u"Bag cleaning Removed {} items".format(str(removed)))
+    worker.log.info(u"Bag cleaning Removed {} items".format(str(removed)))
 
 
 async def beh_catch_encountered_pokemon(pogoservice, position, encounter_id, spawn_point_id, probablity, pokemon_id,

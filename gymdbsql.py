@@ -712,6 +712,19 @@ def spawnpoints_in_box(fencebox):
         connection.close()
 
 
+def gyms_in_box(fencebox):
+    connection = __gymmapconnection()
+    try:
+        with connection.cursor() as cursor:
+            sql = "select p.*,l.altitude from " \
+                  "gym p left join locationaltitude " \
+                  "l on p.latitude=l.latitude and p.longitude=l.longitude where p.latitude < %s and p.latitude > %s and p.longitude < %s and p.longitude > %s  ORDER BY longitude"
+            cursor.execute(sql, (fencebox[0][0], fencebox[1][0], fencebox[1][1], fencebox[0][1]))
+            return cursor.fetchall()
+    finally:
+        connection.close()
+
+
 def pokestops_in_box(fencebox):
     connection = __gymmapconnection()
     try:

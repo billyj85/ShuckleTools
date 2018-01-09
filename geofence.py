@@ -50,6 +50,7 @@ class Geofences(object):
                 return True
         return False
 
+
     def fence_name(self, lat, lng):
         for fence in self.fences:
             if fence.contains(lat, lng):
@@ -101,6 +102,14 @@ class Geofence(object):
 
     def box(self):
         return (self.__max_x, self.__max_y), (self.__min_x, self.__min_y)
+
+    def contains_fort(self, fort):
+        return self.contains(fort["latitude"], fort["longitude"])
+
+    def filter_forts(self, gyms):
+        result = [loc for loc in gyms if self.contains_fort(loc)]
+        log.info(u"There are {} elements within fence".format(str(len(result))))
+        return result
 
     def contains(self, x, y):
         # Quick check the boundary box of the entire polygon

@@ -10,9 +10,6 @@ from aiopogo.hash_server import BadHashRequestException, HashingOfflineException
 from aiopogo.utilities import f2i
 from aiopogo import utilities as util
 
-log = logging.getLogger(__name__)
-
-
 class AccountBannedException(Exception):
     pass
 
@@ -25,11 +22,11 @@ def set_goman_hash_endpoint(endpoint):
     goman_endpoint = endpoint
 
 
-async def req_call_with_retries(req):
+async def req_call_with_retries(req, log):
     attempts = 0
     while True:
         try:
-            return await req_call_with_hash_retries(req)
+            return await req_call_with_hash_retries(req, log)
         except NianticOfflineException:
             log.warning("NianticOfflineException")
             if attempts > 5:
@@ -43,7 +40,7 @@ async def req_call_with_retries(req):
         attempts += 1
 
 
-async def req_call_with_hash_retries(req):
+async def req_call_with_hash_retries(req, log):
     attempts = 0
     while True:
         try:
@@ -83,6 +80,8 @@ async def send_generic_request(req, account, settings=True, buddy=True, inbox=Tr
     req.get_inventory(last_timestamp_ms=account['last_timestamp_ms'])
     req.check_awarded_badges()
 
+    log = logging.LoggerAdapter(logging.getLogger(__name__), {'worker_name': account['username']})
+
     if settings:
         if 'remote_config' in account:
             req.download_settings(hash=account['remote_config']['hash'])
@@ -98,7 +97,7 @@ async def send_generic_request(req, account, settings=True, buddy=True, inbox=Tr
     hash_attempts = 0
     while True:
         try:
-            resp = await req_call_with_retries(req)
+            resp = await req_call_with_retries(req, log)
             break
         except HashingOfflineException:  # todo: port logic  properly
             if hash_attempts > 5:
@@ -133,6 +132,9 @@ def parse_remote_config(account, api_response):
     if 'DOWNLOAD_REMOTE_CONFIG_VERSION' not in api_response:
         return
 
+    log = logging.LoggerAdapter(logging.getLogger(__name__), {'worker_name': account['username']})
+
+
     remote_config = api_response['DOWNLOAD_REMOTE_CONFIG_VERSION']
     if remote_config.result == 0:
         raise AccountBannedException('The account has a temporal ban')
@@ -162,6 +164,8 @@ def __parse_inventory(account, api_response):
     parsed_eggs = 0
     parsed_incubators = 0
     account['last_timestamp_ms'] = inventory.inventory_delta.new_timestamp_ms
+
+    log = logging.LoggerAdapter(logging.getLogger(__name__), {'worker_name': account['username']})
 
     for item in inventory.inventory_delta.inventory_items:
         item_data = item.inventory_item_data

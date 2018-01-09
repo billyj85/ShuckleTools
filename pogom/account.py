@@ -129,7 +129,7 @@ async def rpc_login_sequence(args, api, account, proceed):
 
     try:
         req = api.create_request()
-        await req_call_with_retries(req)
+        await req_call_with_retries(req, log)
 
         total_req += 1
         await asyncio.sleep(random.uniform(.43, .97))
@@ -148,7 +148,7 @@ async def rpc_login_sequence(args, api, account, proceed):
     try:
         req = api.create_request()
         req.get_player(player_locale=args.player_locale)
-        resp = await req_call_with_retries(req)
+        resp = await req_call_with_retries(req, log)
         parse_get_player(account, resp)
         warning_ = account['warning']
 
@@ -307,7 +307,7 @@ async def rpc_login_sequence(args, api, account, proceed):
     try:  # 7 - Make an empty request to retrieve store items.
         req = api.create_request()
         req.get_store_items()
-        await req_call_with_retries(req)
+        await req_call_with_retries(req, log)
 
         total_req += 1
         await asyncio.sleep(random.uniform(.6, 1.1))

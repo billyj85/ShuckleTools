@@ -174,7 +174,7 @@ async def beh_spin_nearby_pokestops(pogoservice, map_objects, position, range_m=
                     position = move_towards(position, fort_as_coordinate(pokestop), m_to_move)
                 elif idx > 0:
                     idx_ = min(idx, 2) * 200
-                    pogoservice.log.info(u"Random sleeping at least {}ms for additional stops".format(idx_))
+                    # pogoservice.log.info(u"Random sleeping at least {}ms for additional stops".format(idx_))
                     # await random_sleep_z(idx_, idx_ + 100)  # Do not let Niantic throttle
                 res = await beh_spin_pokestop_raw(pogoservice, pokestop, position, item_limits=item_limits)
                 if res == 1:

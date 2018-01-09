@@ -10,9 +10,6 @@ from aiopogo.exceptions import AuthException, NianticIPBannedException, BadRPCEx
 from .apiRequests import (send_generic_request, AccountBannedException,
                           req_call_with_retries)
 
-log = logging.getLogger(__name__)
-
-
 class OutOfAccountsException:
     """We have run out of accounts and cannot serve more requests"""
 
@@ -52,7 +49,7 @@ def is_login_required(api):
         remaining_time = provider._access_token_expiry - time.time()
 
         if remaining_time > 60:
-            log.debug('Credentials remain valid for another %f seconds.', remaining_time)
+            logging.getLogger(__name__).debug('Credentials remain valid for another %f seconds.', remaining_time)
             return False
     return True
 
@@ -69,6 +66,8 @@ async def check_login(args, account, api, proxy_url, proceed):
     # Logged in? Enough time left? Cool!
     if not is_login_required(api):
         return True
+
+    log = logging.LoggerAdapter(logging.getLogger(__name__), {'worker_name': account['username']})
 
     # Try to login. Repeat a few times, but don't get stuck here.
     num_tries = 0
@@ -122,6 +121,8 @@ async def check_login(args, account, api, proxy_url, proceed):
 async def rpc_login_sequence(args, api, account, proceed):
     total_req = 0
     app_version = 8700
+
+    log = logging.LoggerAdapter(logging.getLogger(__name__), {'worker_name': account['username']})
 
     # 1 - Make an empty request to mimick real app behavior.
     log.debug('Starting RPC login sequence...')
@@ -282,7 +283,7 @@ async def rpc_login_sequence(args, api, account, proceed):
     # Check tutorial completion.
     if not all(x in account['tutorials'] for x in (0, 1, 3, 4, 7)):
         log.info('Completing tutorial steps for %s.', account['username'])
-        await complete_tutorial(args, api, account)
+        await complete_tutorial(args, api, account, log)
     else:
         log.debug('Account %s already did the tutorials.', account['username'])
         # 6 - Get player profile.
@@ -355,7 +356,7 @@ async def rpc_login_sequence(args, api, account, proceed):
 # Complete minimal tutorial steps.
 # API argument needs to be a logged in API instance.
 # TODO: Check if game client bundles these requests, or does them separately.
-async def complete_tutorial(args, api, account):
+async def complete_tutorial(args, api, account, log):
     tutorial_state = account['tutorials']
     if 0 not in tutorial_state:
         await asyncio.sleep(random.uniform(1, 5))

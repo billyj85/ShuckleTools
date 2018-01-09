@@ -231,7 +231,7 @@ async def levelup(thread_num, worker, global_catch_feed_, latch, is_forced_updat
         worker.log.info(u"Doing initial pokestops PHASE")
 
         await process_points(feeder, False, candy_12_feed, cm, sm, wm, travel_time, worker, 1,
-                             CatchConditions.initial_condition())
+                             CatchConditions.initial_condition(), receive_broadcasts=False)
 
     sm.clear_state()
 
@@ -253,7 +253,7 @@ async def levelup(thread_num, worker, global_catch_feed_, latch, is_forced_updat
 
     if not fast_25:
         await process_points(feeder, False, global_catch_feed_, cm, sm, wm, travel_time, worker, 2,
-                             CatchConditions.grind_condition())
+                             CatchConditions.grind_condition(),receive_broadcasts=False)
         await beh_aggressive_bag_cleaning(worker)
     await process_points(xp_feeder, True, global_catch_feed_, cm, sm, wm, travel_time, worker, 3,
                          CatchConditions.grind_condition(), receive_broadcasts=False)
@@ -267,7 +267,7 @@ async def levelup(thread_num, worker, global_catch_feed_, latch, is_forced_updat
     xp_feeder2 = PositionFeeder(xp_p2[args.route], is_forced_update)
     await initial_stuff(feeder, wm, cm, worker)
     await process_points(feeder, False, global_catch_feed_, cm, sm, wm, travel_time, worker, 4,
-                         CatchConditions.grind_condition())
+                         CatchConditions.grind_condition(), receive_broadcasts=False)
     await beh_aggressive_bag_cleaning(worker)
     if not await sm.reached_limits():
         await process_points(xp_feeder2, True, global_catch_feed_, cm, sm, wm, travel_time, worker, 5,

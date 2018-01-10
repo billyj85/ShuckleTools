@@ -101,7 +101,7 @@ class Geofence(object):
             self.__max_y = max(p[1], self.__max_y)
 
     def box(self):
-        return (self.__max_x, self.__max_y), (self.__min_x, self.__min_y)
+        return (self.__max_x, self.__min_y), (self.__min_x, self.__max_y)
 
     def contains_fort(self, fort):
         return self.contains(fort["latitude"], fort["longitude"])

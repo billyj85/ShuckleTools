@@ -2,6 +2,8 @@ import unittest
 from datetime import datetime as dt, timedelta
 
 import math
+from enum import Enum
+
 
 def second_of_hour(time):
     return time.minute * 60 + time.second
@@ -16,7 +18,10 @@ def equi_rect_distance_m(loc1, loc2):
     y = lat2 - lat1
     return (r * math.sqrt(x * x + y * y)) * 1000
 
-
+class ElementType(Enum):
+     SPAWNPOINT = 1
+     POKESTOP = 2
+     GYM = 3
 
 
 class SpawnPoints:
@@ -71,6 +76,9 @@ class MapElement(object):
 
     def __repr__(self):
         return self.__str__()
+
+    def element_type(self):
+        raise NotImplementedError("This is an abstract method.")
 
     def __getitem__(self, key):
         if key == 0 or key == "lat":
@@ -211,6 +219,9 @@ class Pokestop(MapElement):
         id_ = tuple[1]
         return Pokestop(id_, pos[0], pos[1], pos[2])
 
+    def element_type(self):
+        return ElementType.POKESTOP
+
 
 class GymElement(MapElement):
     def __init__(self, row):
@@ -218,8 +229,17 @@ class GymElement(MapElement):
         self.name = row["name"]
 
     @staticmethod
+    def create(id_, latitude, longitude, altitude):
+        row = {"gym_id": id_, "latitude": latitude, "longitude": longitude, "altitude": altitude}
+        return GymElement(row)
+
+
+    @staticmethod
     def from_db_rows(rows):
         return [GymElement(row) for row in rows]
+
+    def element_type(self):
+        return ElementType.GYM
 
 
 class SpawnPoint(MapElement):
@@ -234,6 +254,11 @@ class SpawnPoint(MapElement):
         self.latest_seen = row["latest_seen"]
         self.earliest_unseen = row["earliest_unseen"]
 
+    @staticmethod
+    def create(id_, latitude, longitude, altitude):
+        row = {"id": id_, "latitude": latitude, "longitude": longitude, "altitude": altitude}
+        return SpawnPoint(row)
+
     def location(self):
         return self.latitude, self.longitude, self.altitude
 
@@ -244,6 +269,9 @@ class SpawnPoint(MapElement):
     @staticmethod
     def from_db_rows(rows):
         return [SpawnPoint(row) for row in rows]
+
+    def element_type(self):
+        return ElementType.SPAWNPOINT
 
     def __str__(self):
         startwindow = self.startwindow()

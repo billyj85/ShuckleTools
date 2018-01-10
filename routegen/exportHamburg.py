@@ -26,7 +26,7 @@ fence = Geofence("hamburg", [
     (53.31389056047761, 10.513916015625),
     (53.793591468075, 10.4754638671875),
     (53.824405643545084, 9.55810546875)])
-box = ((53.84, 9.56), (53.30, 10.514))
+box=fence.box()
 sps = fence.filter_forts(spawnpoints_in_box(box))
 pokestops = fence.filter_forts(pokestops_in_box(box))
 gyms = fence.filter_forts(gyms_in_box(box))

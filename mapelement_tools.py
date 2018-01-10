@@ -1,8 +1,9 @@
+import codecs
 import logging
 import unittest
 from datetime import datetime as dt, timedelta
 
-from mapelements import Pokestop, RouteElement, SpawnPoints
+from mapelements import Pokestop, RouteElement, SpawnPoints, GymElement
 from mapelements import SpawnPoint
 
 try:
@@ -20,12 +21,39 @@ from scannerutil import equi_rect_distance_m, second_of_hour
 
 log = logging.getLogger(__name__)
 
+
 def create_pokestop(stop):
     latitude_ = stop["latitude"]
     longitude_ = stop["longitude"]
     altitude_ = stop["altitude"]
     return Pokestop(stop["pokestop_id"], latitude_, longitude_, altitude_)
 
+
+def create_elem(id, type, lat, lng, alt):
+    if type == "P":
+        return Pokestop(id, lat, lng, alt)
+    if type == "S":
+        return SpawnPoint.create(id, lat, lng, alt)
+    if type == "G":
+        return GymElement.create(id, lat, lng, alt)
+    raise "Element type {} not known".format(type)
+
+
+def load_map_elements(inputFile, sep=",", commentaryMarker="#"):
+    data = []
+    with codecs.open(inputFile, 'r', 'utf-8') as f:
+        for line in f:
+            line = line.strip()
+            if len(line) < 1 or line[0] == commentaryMarker:
+                continue
+            parts = line.split(sep)
+            id = parts[0]
+            type = parts[1]
+            lat = parts[2]
+            lon = parts[3]
+            alt = parts[4]
+            data.append(create_elem(id, type, lat, lon, alt))
+    return data
 
 def create_spawnpoint(point):
     return SpawnPoint(point)

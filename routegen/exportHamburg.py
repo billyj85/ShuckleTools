@@ -30,13 +30,19 @@ box=fence.box()
 sps = fence.filter_forts(spawnpoints_in_box(box))
 pokestops = fence.filter_forts(pokestops_in_box(box))
 gyms = fence.filter_forts(gyms_in_box(box))
+
+
+def dump_elem(text_file, x, idfield, type):
+    text_file.write("{},{},{},{},{}\n".format(str(x[idfield]), type, str(x["latitude"]), str(x["longitude"]), str(x["altitude"])))
+
+
 with open("{}/../routes/hamburg_source_data.txt".format(dirname), "w") as text_file:
     for x in gyms:
-        text_file.write("{},{},{}\n".format(str(x["latitude"]), str(x["longitude"]), "G"))
+        dump_elem(text_file, x, "gym_id","G")
     for x in pokestops:
-        text_file.write("{},{},{}\n".format(str(x["latitude"]), str(x["longitude"]), "P"))
+        dump_elem(text_file, x, "pokestop_id", "P")
     for x in sps:
-        text_file.write("{},{},{}\n".format(str(x["latitude"]), str(x["longitude"]), "S"))
+        dump_elem(text_file, x, "id", "S")
 
 
 print ("Done")

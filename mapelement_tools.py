@@ -1,9 +1,10 @@
 import codecs
 import logging
+import os
 import unittest
 from datetime import datetime as dt, timedelta
 
-from mapelements import Pokestop, RouteElement, SpawnPoints, GymElement
+from mapelements import Pokestop, RouteElement, SpawnPoints, GymElement, ElementType
 from mapelements import SpawnPoint
 
 try:
@@ -11,6 +12,8 @@ try:
 except ImportError: # will be 3.x series
     pass
 from itertools import islice
+
+dirname = os.path.dirname(os.path.realpath(__file__))
 
 
 from geography import step_position, center_geolocation, box_around, move_towards
@@ -41,7 +44,7 @@ def create_elem(id, type, lat, lng, alt):
 
 def load_map_elements(inputFile, sep=",", commentaryMarker="#"):
     data = []
-    with codecs.open(inputFile, 'r', 'utf-8') as f:
+    with codecs.open(dirname + "/routes/" + inputFile, 'r', 'utf-8') as f:
         for line in f:
             line = line.strip()
             if len(line) < 1 or line[0] == commentaryMarker:
@@ -49,8 +52,8 @@ def load_map_elements(inputFile, sep=",", commentaryMarker="#"):
             parts = line.split(sep)
             id = parts[0]
             type = parts[1]
-            lat = parts[2]
-            lon = parts[3]
+            lat = float(parts[2])
+            lon = float(parts[3])
             alt = parts[4]
             data.append(create_elem(id, type, lat, lon, alt))
     return data
@@ -108,6 +111,23 @@ def create_pokestops(stops_to_check):
         pokestop = create_pokestop(stop)
         point_list.append(pokestop)
     return point_list
+
+def filter_map_elements(map_elements, type):
+    return [f for f in map_elements if f.element_type() == type]
+
+def fence_elements(map_elements, fence):
+    return fence.filter_forts(map_elements)
+
+
+def pokestops_in_fence(file, fence):
+    me = load_map_elements(file)
+    result = [f for f in me if f.element_type() == ElementType.POKESTOP and fence.contains_fort(f)]
+    return result
+
+def spawnpoints_in_fence(file, fence):
+    me = load_map_elements(file)
+    result = [f for f in me if f.element_type() == ElementType.POKESTOP and fence.contains_fort(f)]
+    return result
 
 
 def update_distances(point_list, radius=39):

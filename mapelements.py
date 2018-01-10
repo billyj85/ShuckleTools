@@ -81,11 +81,11 @@ class MapElement(object):
         raise NotImplementedError("This is an abstract method.")
 
     def __getitem__(self, key):
-        if key == 0 or key == "lat":
+        if key == 0 or key == "lat" or key == "latitude":
             return self.coords[0]
-        if key == 1 or key == "lon":
+        if key == 1 or key == "lon" or key == "longitude":
             return self.coords[1]
-        if key == 2:
+        if key == 2 or key == "altitude":
             return self.coords[2]
 
     def __eq__(self, other):
@@ -226,7 +226,7 @@ class Pokestop(MapElement):
 class GymElement(MapElement):
     def __init__(self, row):
         super(GymElement, self).__init__(row["gym_id"], row["latitude"], row["longitude"], row.get("altitude", None))
-        self.name = row["name"]
+        self.name = row.get("name")
 
     @staticmethod
     def create(id_, latitude, longitude, altitude):
@@ -249,10 +249,10 @@ class SpawnPoint(MapElement):
         self.latitude = row["latitude"]
         self.longitude = row["longitude"]
         self.altitude = row.get("altitude", None)
-        self.kind = row["kind"]
-        self.links = row["links"]
-        self.latest_seen = row["latest_seen"]
-        self.earliest_unseen = row["earliest_unseen"]
+        self.kind = row.get("kind")
+        self.links = row.get("links")
+        self.latest_seen = row.get("latest_seen")
+        self.earliest_unseen = row.get("earliest_unseen")
 
     @staticmethod
     def create(id_, latitude, longitude, altitude):

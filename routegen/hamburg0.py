@@ -1,17 +1,16 @@
 import asyncio
 
-from levelupRoutes import create_pokestop_list, create_boost_xp_route, create_spawnpoint_route, fence, write_file
+from levelupRoutes import  fence, write_file, create_xp_route
+from mapelement_tools import load_map_elements
 
 loop = asyncio.get_event_loop()
 
 
 async def start():
-    def create_xp_route(fence_, gpx_name_root):
-        pokestop_list = create_pokestop_list(fence_)
-        return create_boost_xp_route(pokestop_list, fence_, gpx_name_root + "_xp.gpx", 190)
+    location_elements = load_map_elements("hamburg_source_data.txt")
+    fence_filtered = fence("InitialHamburg").filter_forts(location_elements)
 
-    hamburg_initial_fence = fence("InitialHamburg")
-    xp_route_initial = create_xp_route(hamburg_initial_fence, "hbg_initial")
+    xp_route_initial = create_xp_route(fence_filtered, "hbg_initial")
     write_file( "hamburg_initial.py", "stop_route_initial", str(xp_route_initial))
 
 loop.run_until_complete(start())

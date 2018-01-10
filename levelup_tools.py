@@ -126,7 +126,7 @@ def back_to_route_elements(route_map, route_elements):
         result.extend(filter(lambda e: e.coords[0] == pos[0] and e.coords[1] == pos[1], route_elements))
     return result
 
-def find_xp_route(point_list, fence_box, target_positions, min_size=2 ):
+def find_xp_route(point_list, target_positions, min_size=2 ):
     route_elements = find_largest_groups(point_list, min_size)
     best_distance, best_route = find_best([x.as_latlon_object() for x in route_elements], target_positions)
     return back_to_route_elements( best_route, route_elements)

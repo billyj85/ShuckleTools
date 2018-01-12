@@ -29,9 +29,6 @@ monocle_accounts = AsyncAccountManager.load_accounts(args.accountcsv)
 if not args.login:
     set_account_level_from_args(monocle_accounts)
 duration = datetime.timedelta(hours=int(args.allocation_duration)) if args.allocation_duration else None
-account_manager = AsyncAccountManager.create_empty(args, loop)
-
-account_manager = None
 
 location = location_parse(args.location)
 
@@ -53,6 +50,7 @@ async def check_account(delay):
 num_proxies = len(args.proxy) if args.proxy else 1
 
 async def start():
+    account_manager = AsyncAccountManager.create_empty(args, loop)
     await account_manager.insert_accounts(monocle_accounts, args.system_id, duration, args.force_system_id,
                                     args.skip_assigned, args.overwrite_level)
     print("Inserted accounts")

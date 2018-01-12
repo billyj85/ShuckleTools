@@ -61,15 +61,12 @@ async def start():
 
             # todo: fix asyncio
             for counter in range(0, account_manager.size()):
-                futures.append(pool.submit(lambda: check_account(4 if num_proxies < counter < (num_proxies*2) else 0)))
+                # probably terminates too early since using run_until_complete
+                await check_account(4 if num_proxies < counter < (num_proxies*2) else 0)
 
             results = [r.result() for r in as_completed(futures)]
             return results
 
-
-asyncio.ensure_future(start())
-loop.run_forever()
-
-
+loop.run_until_complete(start())
 
 

@@ -54,7 +54,7 @@ class CommonAccountManager(object):
                            self)
         return created
 
-    def __create_account_objects(self, accts):
+    def create_account_objects(self, accts):
         return [self.__create_account_object(account) for account in accts]
 
     def __create_account_object(self, account):

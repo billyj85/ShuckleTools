@@ -58,7 +58,7 @@ class AsyncAccountManager(CommonAccountManager):
             log.info("Loading database accounts")
             self.accounts = await self.__load_db_account_objects()
         else:
-            self.accounts = self.__create_account_objects(file_accts)
+            self.accounts = self.create_account_objects(file_accts)
         self.sort_accounts()
         for acct in self.accounts:
             self.status[acct.username] = acct.status_data()

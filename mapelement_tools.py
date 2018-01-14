@@ -54,7 +54,7 @@ def load_map_elements(inputFile, sep=",", commentaryMarker="#"):
             type = parts[1]
             lat = float(parts[2])
             lon = float(parts[3])
-            alt = parts[4]
+            alt = float(parts[4]) if parts[4] != "None" else 5.5  # todo. Look at this
             data.append(create_elem(id, type, lat, lon, alt))
     return data
 

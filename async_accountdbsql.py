@@ -167,7 +167,7 @@ async def update_allocation_end(username, allocation_end):
 async def insert_account(account, system_id, allocated, allocation_end):
     await do_update(*sql_insert_account(account, system_id, allocated, allocation_end))
     if "level" in account:
-        update_account_level(account["username"], account["level"])
+        await update_account_level(account["username"], account["level"])
 
 
 async def upsert_account(username, password, provider, system_id):

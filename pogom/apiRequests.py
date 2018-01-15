@@ -7,6 +7,7 @@ import logging
 from aiopogo.exceptions import HashingQuotaExceededException, HashingTimeoutException, UnexpectedHashResponseException, \
     NianticOfflineException, InvalidRPCException
 from aiopogo.hash_server import BadHashRequestException, HashingOfflineException
+from aiopogo.pogoprotos.data.ar_plus_encounter_values_pb2 import ARPlusEncounterValues
 from aiopogo.utilities import f2i
 from aiopogo import utilities as util
 
@@ -318,6 +319,10 @@ async def claim_codename(api, account, name):
 
 @catchRequestException('catch pokemon')
 async def catch_pokemon(api, account, encounter_id, pokeball, normalized_reticle_size, spawn_point_id, hit_pokemon, spin_modifier, normalized_hit_position):
+    x = ARPlusEncounterValues()
+    x.proximity = 0
+    x.awareness = 0
+    x.pokemon_frightened = False
     req = api.create_request()
     req.catch_pokemon(
     encounter_id=encounter_id,
@@ -326,7 +331,8 @@ async def catch_pokemon(api, account, encounter_id, pokeball, normalized_reticle
     spawn_point_id=spawn_point_id,
     hit_pokemon=hit_pokemon,
     spin_modifier=spin_modifier,
-    normalized_hit_position=normalized_hit_position)
+    normalized_hit_position=normalized_hit_position,
+    ar_plus_values={"proximity": 0, "awareness": 0, "pokemon_frightened": False})
     return await send_generic_request(req, account)
 
 @catchRequestException('set favourite')

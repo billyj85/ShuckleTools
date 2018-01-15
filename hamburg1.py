@@ -1,8 +1,8 @@
 import asyncio
 
-from mapelement_tools import load_map_elements
-from routegen.levelupRoutes import create_spawnpoint_route, fence, write_file, \
+from levelupRoutes import create_spawnpoint_route, fence, write_file, \
     create_xp_route
+from mapelement_tools import load_map_elements
 
 loop = asyncio.get_event_loop()
 

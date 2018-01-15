@@ -173,7 +173,7 @@ class RouteElement(MapElement):
         return str(self.as_tuple())
 
     def __repr__(self):
-        return self.__str__()
+        return self.__str__() + "\n"
 
 class MapElements(object):
     initial_gpx = """

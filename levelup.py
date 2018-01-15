@@ -89,7 +89,7 @@ async def safe_levelup(thread_num, global_catch_feed_, latch, forced_update_):
         try:
             worker = await next_worker()
             if worker:
-                await levelup(thread_num, worker, global_catch_feed_, latch, forced_update_, fast_25=args.fast_levelup)
+                await levelup(thread_num, worker, global_catch_feed_, latch, forced_update_)
         except OutOfAccounts:
             worker.log.info("No more accounts, exiting worker thread")
             return
@@ -211,11 +211,10 @@ async def initial_stuff(feeder, wm, cm, worker):
     await cm.do_transfers()
 
 
-async def levelup(thread_num, worker, global_catch_feed_, latch, is_forced_update, use_eggs=True, fast_25=False):
+async def levelup(thread_num, worker, global_catch_feed_, latch, is_forced_update, use_eggs=True):
     travel_time = worker.getlayer(TravelTime)
 
     wm = WorkerManager(worker, use_eggs, args.target_level)
-    wm.fast_egg = fast_25
     cm = CatchManager(worker, args.catch_pokemon, global_catch_feed_)
     sm = StopManager(worker, cm, wm, args.max_stops)
 
@@ -264,12 +263,12 @@ async def levelup(thread_num, worker, global_catch_feed_, latch, is_forced_updat
     wm.explain()
     cm.catch_feed = global_catch_feed_
     feeder = PositionFeeder(routes_p2[args.route], is_forced_update)
-    xp_feeder2 = PositionFeeder(xp_p2[args.route], is_forced_update)
     await initial_stuff(feeder, wm, cm, worker)
     await process_points(feeder, False, global_catch_feed_, cm, sm, wm, travel_time, worker, 4,
                          CatchConditions.grind_condition(), receive_broadcasts=False)
     await beh_aggressive_bag_cleaning(worker)
     if not await sm.reached_limits():
+        xp_feeder2 = PositionFeeder(xp_p2[args.route], is_forced_update)
         await process_points(xp_feeder2, True, global_catch_feed_, cm, sm, wm, travel_time, worker, 5,
                              CatchConditions.grind_condition(), receive_broadcasts=False)
 

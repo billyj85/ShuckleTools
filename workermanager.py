@@ -27,9 +27,7 @@ class WorkerManager(object):
         self.target_level = target_level
         self.xp_log = {}
         self.next_gmo = datetime.now()
-        self.fast_egg = False
         self.initial_fast_egg = True
-        self.first_egg = True
         self.egg_number = 0
         self.log = logging.LoggerAdapter(logging.getLogger("pogoserv"), {'worker_name': worker.name()})
 
@@ -114,15 +112,11 @@ class WorkerManager(object):
                 self.egg_number += 1
                 self.next_egg = datetime.now() + timedelta(minutes=90)
                 await db_set_egg_count(self.worker.account_info().username, egg_count(self.worker))
-            elif self.fast_egg or self.initial_fast_egg:
+            elif self.initial_fast_egg:
                 self.initial_fast_egg = False
                 await self.worker.do_use_lucky_egg()
                 self.egg_number += 1
-                if self.first_egg:
-                    self.first_egg = False
-                    self.next_egg = datetime.now() + timedelta(minutes=60)
-                else:
-                    self.next_egg = datetime.now() + timedelta(minutes=45)
+                self.next_egg = datetime.now() + timedelta(minutes=60)
                 await db_set_egg_count(self.worker.account_info().username, egg_count(self.worker))
         return egg_active
 

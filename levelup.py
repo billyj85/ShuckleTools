@@ -133,7 +133,7 @@ async def process_points(locations, xp_boost_phase, catch_feed, cm, sm, wm, trav
         if await sm.reached_limits():
             return
 
-        egg_active = await wm.use_egg(cm)
+        egg_active = await wm.use_egg(cm, xp_boost_phase)
         player_location = get_pos_to_use(route_element)
         next_pos = get_pos_to_use(next_route_element)
 
@@ -259,7 +259,7 @@ async def levelup(thread_num, worker, global_catch_feed_, latch, is_forced_updat
                          CatchConditions.grind_condition(), receive_broadcasts=False)
 
     sm.clear_state()
-    cm.evolve_requirement = 90
+    # cm.evolve_requirement = 90
     worker.log.info(u"Main grind PHASE 2")
     wm.explain()
     cm.catch_feed = global_catch_feed_

@@ -102,14 +102,14 @@ class WorkerManager(object):
     def has_lucky_egg(self):
         return has_lucky_egg(self.worker)
 
-    async def use_egg(self, cm):
+    async def use_egg(self, cm, xp_boost_phase):
         has_egg = self.has_lucky_egg()
         egg_active = self.has_active_lucky_egg()
         evolving_possible = not cm or cm.can_start_evolving()
         previous_egg_expired = (datetime.now() > self.next_egg)
 
         if not egg_active and has_egg and previous_egg_expired:
-            if evolving_possible:
+            if evolving_possible or xp_boost_phase:
                 await self.worker.do_use_lucky_egg()
                 self.egg_number += 1
                 self.next_egg = datetime.now() + timedelta(minutes=90)

@@ -59,7 +59,7 @@ def load_map_elements(inputFile, sep=",", commentaryMarker="#"):
     return data
 
 def create_spawnpoint(point):
-    return SpawnPoint(point)
+    return SpawnPoint.create(point.id, point[0], point[1], point[2])
 
 
 def add_altitudes(stops, gmaps_key):

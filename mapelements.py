@@ -248,7 +248,7 @@ class SpawnPoint(MapElement):
         self.id = row["id"]
         self.latitude = row["latitude"]
         self.longitude = row["longitude"]
-        self.altitude = row.get("altitude", None)
+        self.altitude = row["altitude"]
         self.kind = row.get("kind")
         self.links = row.get("links")
         self.latest_seen = row.get("latest_seen")

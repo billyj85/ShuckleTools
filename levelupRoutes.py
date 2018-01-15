@@ -47,7 +47,7 @@ def filter_too_close(points):
 '''
 
 
-def create_spawnpoint_route(fence_filtered, gpx_filename, target_positions=360*3):
+def create_spawnpoint_route(fence_filtered, gpx_filename, target_positions=360*5):
     spawnpoint_elements = filter_map_elements(fence_filtered, ElementType.SPAWNPOINT)
     spawnpoints = create_spawnpoint_model(spawnpoint_elements, args)
     spawnpoint_route = find_xp_route(spawnpoints, target_positions=target_positions, min_size=4 )

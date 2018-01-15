@@ -137,7 +137,7 @@ async def process_points(locations, xp_boost_phase, catch_feed, cm, sm, wm, trav
         player_location = get_pos_to_use(route_element)
         next_pos = get_pos_to_use(next_route_element)
 
-        await sm.spin_all_stops(map_objects, player_location, range_m=50 if xp_boost_phase else 39.8, exclusion={} if xp_boost_phase else excluded_stops )
+        await sm.spin_all_stops(map_objects, player_location, range_m=50, exclusion={} if xp_boost_phase else excluded_stops )
 
         if pos_index % 10 == 0:
             sm.log_inventory()

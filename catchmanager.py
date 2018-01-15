@@ -48,7 +48,7 @@ class CatchConditions:
         result = CatchConditions()
         result.only_candy = True
         result.only_candy_12 = True
-        result.only_unseen = True
+        result.only_unseen = False
         result.catch_50 = True
         return result
 

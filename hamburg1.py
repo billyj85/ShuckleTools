@@ -9,11 +9,12 @@ loop = asyncio.get_event_loop()
 
 async def start():
     location_elements = load_map_elements("hamburg_source_data.txt")
-    fence_filtered = fence("HamburgLeft").filter_forts(location_elements)
-    xp_route_left = create_xp_route(fence_filtered, "hbg_left")
-    write_file( "hamburg_xp1.py", "xp_route_1", str(xp_route_left))
-    spawnpoint_route_left = create_spawnpoint_route(fence_filtered, "spawnpoint_route_hl.gpx")
-    write_file( "hamburg_grind1.py", "spawnpoint_route_1", str(spawnpoint_route_left))
+    fence_filtered = fence("HamburgRight").filter_forts(location_elements)
+
+    xp_route_right = create_xp_route(fence_filtered, "hbg_right")
+    write_file( "hamburg_xp1.py", "xp_route_1", str(xp_route_right))
+    spawnpoint_route_right = create_spawnpoint_route(fence_filtered, "spawnpoint_route_hr.gpx")
+    write_file( "hamburg_grind1.py", "spawnpoint_route_1", str(spawnpoint_route_right))
 
 
 loop.run_until_complete(start())

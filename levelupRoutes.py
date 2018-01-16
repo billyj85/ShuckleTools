@@ -47,7 +47,7 @@ def filter_too_close(points):
 '''
 
 
-def create_spawnpoint_route(fence_filtered, used_pokestops, gpx_filename, radius=39, target_positions=360*5):
+def create_spawnpoint_route(fence_filtered, used_pokestops, gpx_filename, radius=39, target_positions=360*3):
     spawnpoint_elements = filter_map_elements(fence_filtered, ElementType.SPAWNPOINT)
 
     #pokestop_list = filter_map_elements(fence_filtered, ElementType.POKESTOP)

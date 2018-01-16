@@ -250,10 +250,9 @@ async def levelup(thread_num, worker, global_catch_feed_, latch, is_forced_updat
     #log.info(u"Waiting for other workers to join here")
     #await latch.do_await()
 
-    if not fast_25:
-        await process_points(feeder, False, global_catch_feed_, cm, sm, wm, travel_time, worker, 2,
-                             CatchConditions.grind_condition(),receive_broadcasts=False)
-        await beh_aggressive_bag_cleaning(worker)
+    await process_points(feeder, False, global_catch_feed_, cm, sm, wm, travel_time, worker, 2,
+                         CatchConditions.grind_condition(),receive_broadcasts=False)
+    await beh_aggressive_bag_cleaning(worker)
     await process_points(xp_feeder, True, global_catch_feed_, cm, sm, wm, travel_time, worker, 3,
                          CatchConditions.grind_condition(), receive_broadcasts=False)
 

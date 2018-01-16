@@ -4,6 +4,11 @@ from datetime import datetime as dt, timedelta
 import math
 from enum import Enum
 
+import logging
+from itertools import islice
+
+from geography import center_geolocation, step_position
+
 
 def second_of_hour(time):
     return time.minute * 60 + time.second
@@ -200,6 +205,57 @@ class MapElements(object):
             text_file.write(self.initial_gpx)
             text_file.write(self.gpx_route())
             text_file.write(self.post_gpx)
+
+    @staticmethod
+    def find_largest_stop_group(mapelements):
+        result = 0
+        for poke_stop in mapelements:
+            result = max(result, len(poke_stop.collected_neighbours()))
+        return result
+
+    @staticmethod
+    def update_distances(point_list, radius=39):
+        distance = 2 * radius
+        for idx, point in enumerate(point_list):
+            point.neighbours = []
+
+        for idx, point in enumerate(point_list):
+            if idx % 500 == 0:
+                print("Processing point at index " + str(idx))
+            cutoff_long = step_position(point.coords, 0, distance)
+            for point2 in islice(point_list, idx + 1, None):
+                point_longitude = point2.coords[1]
+                if point_longitude > cutoff_long[1]:
+                    break
+                point.add_neighbours(point2, distance)
+
+    @staticmethod
+    def find_largest_groups(point_list, min_size=3):
+        log = logging.getLogger(__name__)
+
+        all_coords = {}
+        for stop in point_list:
+            all_coords[stop.coords] = stop
+
+        result_coords = []
+        num_stops_found = 0
+        max_stop_group = MapElements.find_largest_stop_group(point_list)
+        for counter in range(max_stop_group, min_size - 1, -1):
+            for poke_stop_ in point_list:
+                intersected_ = poke_stop_.collected_neighbours()
+                if len(intersected_) == counter and poke_stop_.coords in all_coords:
+                    locations = [n.coords for n in intersected_]
+                    re = RouteElement(center_geolocation(locations), poke_stop_.collected_neighbours())
+                    result_coords.append(re)
+                    num_stops_found += len(locations)
+                    for location in locations:
+                        if location in all_coords:
+                            del all_coords[location]
+                    # clear out neighbours so they dont contribute to further collected_neighhbours
+                    for stop in intersected_:
+                        stop.neighbours = []
+        log.info("Found {} stops".format(str(num_stops_found)))
+        return result_coords
 
     @staticmethod
     def with_bogus_altitude(elements):

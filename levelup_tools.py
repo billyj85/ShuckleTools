@@ -3,8 +3,8 @@ import logging
 import numbers
 import threading
 
-from geography import step_position, chunk_box, is_inside_box, move_in_direction_of
-from mapelement_tools import find_largest_groups
+from geography import step_position, move_in_direction_of
+from mapelements import MapElements
 from scannerutil import precise_coordinate_string, full_precision_coordinate_string, equi_rect_distance_m
 from tokyopath import find_best
 
@@ -127,7 +127,7 @@ def back_to_route_elements(route_map, route_elements):
     return result
 
 def find_xp_route(point_list, target_positions, min_size=2 ):
-    route_elements = find_largest_groups(point_list, min_size)
+    route_elements = MapElements.find_largest_groups(point_list, min_size)
     best_distance, best_route = find_best([x.as_latlon_object() for x in route_elements], target_positions)
     return back_to_route_elements( best_route, route_elements)
 

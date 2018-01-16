@@ -3,9 +3,11 @@ import asyncio
 from levelupRoutes import create_spawnpoint_route, fence, write_file, \
     create_xp_route, pokestop_ids
 from mapelement_tools import load_map_elements
+import sys
 
 loop = asyncio.get_event_loop()
 
+sys.setrecursionlimit(10000)
 
 async def start():
     location_elements = load_map_elements("hamburg_source_data.txt")

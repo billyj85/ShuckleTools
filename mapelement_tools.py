@@ -136,6 +136,7 @@ def update_distances(point_list, radius=39):
         if idx % 500 == 0:
             print("Processing point at index " + str(idx))
         cutoff_long = step_position(point.coords, 0, distance)
+        point.neighbours = []
         for point2 in islice(point_list, idx + 1, None):
             point_longitude = point2.coords[1]
             if point_longitude > cutoff_long[1]:

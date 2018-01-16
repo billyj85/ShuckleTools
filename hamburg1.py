@@ -16,6 +16,9 @@ async def start():
     fence_filtered = fence("HamburgRight").filter_forts(location_elements)
     radius = 39
 
+    spawnpoint_route_right = create_spawnpoint_route(fence_filtered,set(), "spawnpoint_route_hr.gpx", radius)
+    write_file( "hamburg_grind1.py", "spawnpoint_route_1", str(spawnpoint_route_right))
+
     xp_route_right = create_xp_route(fence_filtered, "hbg_right", radius)
     used_pokestops = pokestop_ids(xp_route_right)
     write_file( "hamburg_xp1.py", "xp_route_1", str(xp_route_right))

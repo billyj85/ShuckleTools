@@ -55,10 +55,10 @@ def create_spawnpoint_route(fence_filtered, used_pokestops, gpx_filename, radius
     #update_distances(unused_stops, radius)
     #extra_stops = find_largest_groups(unused_stops, min_size=2)
     #combined = extra_stops + spawnpoint_elements
+    # catch radiusfor spawnpoints
+    spawnpoints = create_spawnpoint_model(spawnpoint_elements, args, radius=55)
 
-    spawnpoints = create_spawnpoint_model(spawnpoint_elements, args)
-
-    spawnpoint_route = find_xp_route(spawnpoints, target_positions=target_positions, min_size=3 )
+    spawnpoint_route = find_xp_route(spawnpoints, target_positions=target_positions, min_size=4 )
     write_gpx_route(gpx_filename, spawnpoint_route)
 
     # clear off the actual points since we dont use them

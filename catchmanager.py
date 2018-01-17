@@ -3,6 +3,9 @@ import numbers
 import logging
 from collections import defaultdict
 
+import datetime
+from datetime import timedelta
+
 from six import itervalues
 
 import pokemon_data
@@ -108,7 +111,7 @@ class CatchManager(object):
         encounter_id = route_element.encounter_id
         return self.is_encountered_previously(encounter_id)
 
-    async def do_catch_moving(self, map_objects, player_pos, next_pos, pos_idx, catch_condition, broadcast=True):
+    async def do_catch_moving(self, map_objects, player_pos, next_pos, pos_idx, catch_condition, first_egg, broadcast=True):
         all_caught = {}
         if not self.is_within_catch_limit():
             self.worker.log.info(u"Catch limit {} exceeeded, not catching any more".format(str(self.catch_limit)))
@@ -128,7 +131,7 @@ class CatchManager(object):
             encountered_previously = self.is_encountered_previously(encounter_id)
             candy_50_catch = catch_condition.is_candy_50_catch(pokemon_id)
 
-            will_catch = (catch_condition.catch_anything or unseen_catch or candy_catch or candy_12_catch or candy_50_catch)
+            will_catch = (first_egg or catch_condition.catch_anything or unseen_catch or candy_catch or candy_12_catch or candy_50_catch)
 
             if encountered_previously:
                 self.worker.log.info(u"{} {} encountered previously".format(str(pokemon_name(pokemon_id)), str(encounter_id)))

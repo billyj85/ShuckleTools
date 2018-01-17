@@ -7,10 +7,15 @@ from routes.hamburg_xp2 import xp_route_2
 
 initial_130_stops = {"hamburg": list(reversed(RouteElement.from_tuples(stop_route_initial)))}
 
-routes_p1 = {"hamburg": RouteElement.from_tuples(spawnpoint_route_1)}
-xp_p1 = {"hamburg": RouteElement.from_tuples(xp_route_1)}
-
-routes_p2 = {"hamburg": RouteElement.from_tuples(spawnpoint_route_2)}
-xp_p2 = {"hamburg": RouteElement.from_tuples(xp_route_2)}
-
-
+routes_all = {
+    "hamburg": [
+        {
+            "grind": RouteElement.from_tuples(spawnpoint_route_1),
+            "xp": RouteElement.from_tuples(xp_route_1)
+        },
+        {
+            "grind": RouteElement.from_tuples(spawnpoint_route_2),
+            "xp": RouteElement.from_tuples(xp_route_2)
+        },
+    ]
+}

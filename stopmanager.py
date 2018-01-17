@@ -11,13 +11,13 @@ class StopManager(object):
     def __init__(self, worker, catch_manager, worker_manager, max_stops):
         self.max_stops = int(max_stops)
         self.worker = worker
-        self.next_spin_log = 10
         self.save_pokestops = False
         self.catch_manager = catch_manager
         self.worker_manager = worker_manager
         self.spins_at = {}
         self.spin_number = 0
         self.spun_stops = set()
+        self.spun_stop_count = 0
         self.log_xp_at = datetime.now().replace(second=0, microsecond=0) + timedelta(minutes=1)
 
     async def spin_stops(self, map_objects, pokestop_id, player_position, index, exclusions={}):
@@ -34,6 +34,7 @@ class StopManager(object):
         spuns = await beh_spin_nearby_pokestops(self.worker, map_objects, player_position, range_m, self.spun_stops,
                                           exclusion)
         self.spun_stops.update(spuns)
+        self.spun_stop_count += len(spuns)
         return len(spuns)
 
     async def spin_single_stop(self, map_objects, player_position, pokestop_id, exclusions):
@@ -50,6 +51,7 @@ class StopManager(object):
 
         if spin_pokestop == 1:
             self.spun_stops.add(pokestop_id)
+            self.spun_stop_count += 1
             if len(self.spun_stops) == 2500 and self.catch_manager.pokemon_caught < 1200:
                 self.save_pokestops = True
                 self.increment_spin()
@@ -70,13 +72,12 @@ class StopManager(object):
         self.worker_manager.register_xp(xp)
         if datetime.now() > self.log_xp_at:
             self.log_xp_at = datetime.now().replace(second=0, microsecond=0) + timedelta(minutes=1)
-            self.next_spin_log = len(self.spun_stops) + 10
             num_stops = self.num_spins_last_30_minutes()
             rem = HashServer.status.get('remaining', 0)
             ratio = float(self.catch_manager.pokemon_caught) / len(self.spun_stops) if len(self.spun_stops) > 0 else 0
             xp_30min_ago = self.worker_manager.xp_30_minutes_ago()
             self.worker.log.info(u"P{}L{}, {}S/{}P//R{}, {}E/{}EW, {}XP/{}@30min{}{}, {}S@30min. idx={}, {} hash"
-                     .format(str(phase), str(self.worker_manager.level), str(len(self.spun_stops)),
+                     .format(str(phase), str(self.worker_manager.level), str(self.spun_stop_count),
                              str(self.catch_manager.pokemon_caught), str(nice_number_2(ratio)),
                              str(self.catch_manager.evolves),
                              str(self.catch_manager.num_evolve_candidates()),
@@ -85,8 +86,8 @@ class StopManager(object):
                              str(num_stops), str(index), str(rem)))
 
     async def reached_limits(self):
-        if len(self.spun_stops) > self.max_stops:
-            self.worker.log.info(u"Reached target spins {}".format(str(len(self.spun_stops))))
+        if self.spun_stop_count > self.max_stops:
+            self.worker.log.info(u"Reached target spins {}".format(str(self.spun_stop_count)))
             return True
         if await self.worker_manager.reached_target_level():
             return True

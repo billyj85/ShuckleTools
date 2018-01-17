@@ -15,7 +15,7 @@ from getmapobjects import is_discardable, is_starter_pokemon, catchable_pokemon
 from levelup_tools import get_pos_to_use, exclusion_pokestops, CountDownLatch
 from management_errors import GaveUp
 from pogoservice import TravelTime, ApplicationBehaviour
-from pokestoproutesv2 import routes_p1, initial_130_stops, routes_p2, xp_p1, xp_p2
+from pokestoproutesv2 import routes_all
 from routes.hamburg_xp1 import xp_route_1
 from routes.hamburg_xp2 import xp_route_2
 from scannerutil import create_forced_update_check, pairwise
@@ -89,7 +89,7 @@ async def safe_levelup(thread_num, global_catch_feed_, latch, forced_update_):
         try:
             worker = await next_worker()
             if worker:
-                await levelup(thread_num, worker, global_catch_feed_, latch, forced_update_)
+                await levelup(thread_num, worker, global_catch_feed_, forced_update_)
         except OutOfAccounts:
             worker.log.info("No more accounts, exiting worker thread")
             return
@@ -147,7 +147,7 @@ async def process_points(locations, xp_boost_phase, catch_feed, cm, sm, wm, trav
             map_objects = await wm.get_map_objects(player_location)
 
         sm.log_status(egg_active, wm.has_egg, wm.egg_number, pos_index, phase)
-        await cm.do_catch_moving(map_objects, player_location, next_pos, pos_index, catch_condition)
+        await cm.do_catch_moving(map_objects, player_location, next_pos, pos_index, catch_condition, wm.is_first_egg())
         await cm.do_bulk_transfers()
 
         time_to_location = travel_time.time_to_location(next_pos)
@@ -211,7 +211,7 @@ async def initial_stuff(feeder, wm, cm, worker):
     await cm.do_transfers()
 
 
-async def levelup(thread_num, worker, global_catch_feed_, latch, is_forced_update, use_eggs=True):
+async def levelup(thread_num, worker, global_catch_feed_, is_forced_update, use_eggs=True):
     travel_time = worker.getlayer(TravelTime)
 
     wm = WorkerManager(worker, use_eggs, args.target_level)
@@ -221,55 +221,24 @@ async def levelup(thread_num, worker, global_catch_feed_, latch, is_forced_updat
     app_behaviour = worker.getlayer(ApplicationBehaviour)
     app_behaviour.behave_properly = False
 
-    cm.catch_feed = candy_12_feed
-    initial_pokestops = initial_130_stops.get(args.route)
-    num_items = max(136, len(initial_pokestops) - thread_num)
-    feeder = PositionFeeder(list(reversed(initial_pokestops))[:num_items], is_forced_update)
-
-    if wm.player_level() < 8:
-        worker.log.info(u"Doing initial pokestops PHASE")
-
-        await process_points(feeder, False, candy_12_feed, cm, sm, wm, travel_time, worker, 1,
-                             CatchConditions.initial_condition(), receive_broadcasts=False)
-
-    sm.clear_state()
-
-    #await latch.count_down()
-    #log.info(u"Waiting for other workers to join here")
-    #await latch.do_await()
-
-
-    worker.log.info(u"Main grind PHASE 1")
-    wm.explain()
-    cm.catch_feed = global_catch_feed_
-    feeder = PositionFeeder(routes_p1[args.route], is_forced_update)
-    xp_feeder = PositionFeeder(xp_p1[args.route], is_forced_update)
-    await initial_stuff(feeder, wm, cm, worker)
-
-    #await latch.count_down()
-    #log.info(u"Waiting for other workers to join here")
-    #await latch.do_await()
-
-    await process_points(feeder, False, global_catch_feed_, cm, sm, wm, travel_time, worker, 2,
-                         CatchConditions.grind_condition(),receive_broadcasts=False)
-    await beh_aggressive_bag_cleaning(worker)
-    await process_points(xp_feeder, True, global_catch_feed_, cm, sm, wm, travel_time, worker, 3,
-                         CatchConditions.grind_condition(), receive_broadcasts=False)
-
-    sm.clear_state()
-    # cm.evolve_requirement = 90
-    worker.log.info(u"Main grind PHASE 2")
-    wm.explain()
-    cm.catch_feed = global_catch_feed_
-    feeder = PositionFeeder(routes_p2[args.route], is_forced_update)
-    await initial_stuff(feeder, wm, cm, worker)
-    await process_points(feeder, False, global_catch_feed_, cm, sm, wm, travel_time, worker, 4,
-                         CatchConditions.grind_condition(), receive_broadcasts=False)
-    await beh_aggressive_bag_cleaning(worker)
-    if not await sm.reached_limits():
-        xp_feeder2 = PositionFeeder(xp_p2[args.route], is_forced_update)
-        await process_points(xp_feeder2, True, global_catch_feed_, cm, sm, wm, travel_time, worker, 5,
+    full_route = routes_all[args.route]
+    phase = 0
+    for phaseNo, route_obj in enumerate(full_route):
+        grind_feed = PositionFeeder(route_obj["grind"], is_forced_update)
+        sm.clear_state()
+        worker.log.info(u"Main grind PHASE {}".format(str(phaseNo)))
+        wm.explain()
+        cm.catch_feed = global_catch_feed_
+        await initial_stuff(grind_feed, wm, cm, worker)
+        phase += 1
+        await process_points(grind_feed, False, global_catch_feed_, cm, sm, wm, travel_time, worker, phase,
                              CatchConditions.grind_condition(), receive_broadcasts=False)
+        await beh_aggressive_bag_cleaning(worker)
+        phase += 1
+        if not await sm.reached_limits():
+            xp_feeder = PositionFeeder(route_obj["xp"], is_forced_update)
+            await process_points(xp_feeder, True, global_catch_feed_, cm, sm, wm, travel_time, worker, phase,
+                                 CatchConditions.grind_condition(), receive_broadcasts=False)
 
     if args.final_system_id:
         await db_set_system_id(worker.name(), args.final_system_id)

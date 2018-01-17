@@ -22,6 +22,7 @@ class WorkerManager(object):
         self.travel_time = worker.getlayer(TravelTime)
         self.use_eggs = use_eggs
         self.next_egg = datetime.now()  # todo fix later
+        self.egg_expiration = None
         self.next_incense = datetime.now()
         self.level = None
         self.target_level = target_level
@@ -100,6 +101,9 @@ class WorkerManager(object):
     def has_lucky_egg(self):
         return has_lucky_egg(self.worker)
 
+    def is_first_egg(self):
+        return self.egg_number == 1 and datetime.now() < self.egg_expiration
+
     async def use_egg(self, cm, xp_boost_phase):
         has_egg = self.has_lucky_egg()
         egg_active = self.has_active_lucky_egg()
@@ -111,12 +115,14 @@ class WorkerManager(object):
                 await self.worker.do_use_lucky_egg()
                 self.egg_number += 1
                 self.next_egg = datetime.now() + timedelta(minutes=90)
+                self.egg_expiration = datetime.now() + timedelta(minutes=30)
                 await db_set_egg_count(self.worker.account_info().username, egg_count(self.worker))
             elif self.initial_fast_egg:
                 self.initial_fast_egg = False
                 await self.worker.do_use_lucky_egg()
                 self.egg_number += 1
                 self.next_egg = datetime.now() + timedelta(minutes=60)
+                self.egg_expiration = datetime.now() + timedelta(minutes=30)
                 await db_set_egg_count(self.worker.account_info().username, egg_count(self.worker))
         return egg_active
 

@@ -104,6 +104,9 @@ class WorkerManager(object):
     def is_first_egg(self):
         return self.egg_number == 1 and datetime.now() < self.egg_expiration
 
+    def is_any_egg(self):
+        return self.egg_expiration and datetime.now() < self.egg_expiration
+
     async def use_egg(self, cm, xp_boost_phase):
         has_egg = self.has_lucky_egg()
         egg_active = self.has_active_lucky_egg()

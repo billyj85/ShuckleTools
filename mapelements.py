@@ -273,6 +273,12 @@ class MapElements(object):
         log.info("Found {} clusters with minimal group size {}, {} total elements ".format(str(len(result_coords)), str(min_size),str(num_elements_found_total)))
         return MapElements(result_coords)
 
+    def __str__(self):
+        return str(self.elements)
+
+    def __repr__(self):
+        return self.__str__()
+
     @staticmethod
     def with_bogus_altitude(elements):
         return MapElements([MapElement(None, x[0], x[1], 0.1) for x in elements])

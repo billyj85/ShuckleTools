@@ -80,7 +80,7 @@ def main():
     print(str(best_route))
 
 def find_best(stop_data, total_stops_to_hit):
-    route_file = open('routes.txt', 'w')
+    # route_file = open('routes.txt', 'w')
     best_route = {}
     best_distance = 10000000
     total_stops_to_hit = min(total_stops_to_hit, len(stop_data) -1)
@@ -91,7 +91,7 @@ def find_best(stop_data, total_stops_to_hit):
         used_elements = set()
         temp_route, distance = calc_route(start_point, stop_data, new_route, used_elements, 0, 0, total_stops_to_hit)
 
-        route_file.write(str(distance) + ' ' + str(temp_route) + '\n')
+        # route_file.write(str(distance) + ' ' + str(temp_route) + '\n')
 
         if (distance < best_distance):
            best_distance = distance

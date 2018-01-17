@@ -254,7 +254,7 @@ class MapElements(object):
             all_coords[stop.coords] = stop
 
         result_coords = []
-        num_stops_found = 0
+        num_elements_found_total = 0
         max_stop_group = MapElements.find_largest_stop_group(self.elements)
         for counter in range(max_stop_group, min_size - 1, -1):
             for poke_stop_ in self.elements:
@@ -263,14 +263,14 @@ class MapElements(object):
                     locations = [n.coords for n in intersected_]
                     re = RouteElement(center_geolocation(locations), poke_stop_.collected_neighbours())
                     result_coords.append(re)
-                    num_stops_found += len(locations)
+                    num_elements_found_total += len(locations)
                     for location in locations:
                         if location in all_coords:
                             del all_coords[location]
                     # clear out neighbours so they dont contribute to further collected_neighhbours
                     for stop in intersected_:
                         stop.neighbours = []
-        log.info("Found {} elements with minimal group size {}".format(str(num_stops_found), str(min_size)))
+        log.info("Found {} clusters with minimal group size {}, {} total elements ".format(str(len(result_coords)), str(min_size),str(num_elements_found_total)))
         return MapElements(result_coords)
 
     @staticmethod

@@ -29,6 +29,14 @@ class CatchConditions:
     catch_50 = False
 
     @staticmethod
+    def pre_l9_condition():
+        result = CatchConditions()
+        result.only_unseen = False
+        result.only_candy = True
+        result.only_candy_12 = True
+        return result
+
+    @staticmethod
     def initial_condition():
         result = CatchConditions()
         result.only_unseen = True

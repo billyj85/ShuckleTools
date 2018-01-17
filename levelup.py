@@ -113,8 +113,8 @@ async def next_worker():
     return worker
 
 
-async def process_points(locations, xp_boost_phase, catch_feed, cm, sm, wm, travel_time, worker, phase,
-                         catch_condition, first_time=None, receive_broadcasts=True, pos_index=0):
+async def process_points(locations, xp_boost_phase, catch_feed, cm, sm, wm, travel_time, worker, phase, first_time=None,
+                         receive_broadcasts=True, pos_index=0):
     first_loc = get_pos_to_use(locations[0])
     worker.log.info(u"First lof {}".format(str(first_loc)))
     map_objects = await wm.move_to_with_gmo(first_loc)
@@ -126,6 +126,7 @@ async def process_points(locations, xp_boost_phase, catch_feed, cm, sm, wm, trav
     excluded_stops = exclusion_pokestops(xp_route_1 + xp_route_2)
     if first_time:
         first_time()
+    catch_condition = CatchConditions.grind_condition() if worker.account_info()["level"] >= 9 else CatchConditions.pre_l9_condition()
     catch_condition.log_description(phase)
     do_extra_gmo_after_pokestops = False
 
@@ -170,8 +171,7 @@ async def process_points(locations, xp_boost_phase, catch_feed, cm, sm, wm, trav
                     break
                 worker.log.info(u"Dealing with nested location {}".format(str(enc_pos)))
                 await process_points([encs[enc_id][0], encs[enc_id][0]], xp_boost_phase, NoOpFeed(), cm, sm, wm,
-                                     travel_time, worker, phase, catch_condition, receive_broadcasts=False,
-                                     pos_index=pos_index)
+                                     travel_time, worker, phase, receive_broadcasts=False, pos_index=pos_index)
                 # i dont like these heuristics one damn bit
                 cm.processed_encounters.add(enc_id)  # this must be done in case there is nothing at the location
                 for encounter_id in encs:  # dump all other stuff reported from this location too, we'v been here.
@@ -232,13 +232,13 @@ async def levelup(thread_num, worker, global_catch_feed_, is_forced_update, use_
         await initial_stuff(grind_feed, wm, cm, worker)
         phase += 1
         await process_points(grind_feed, False, global_catch_feed_, cm, sm, wm, travel_time, worker, phase,
-                             CatchConditions.grind_condition(), receive_broadcasts=False)
+                             receive_broadcasts=False)
         await beh_aggressive_bag_cleaning(worker)
         phase += 1
         if not await sm.reached_limits():
             xp_feeder = PositionFeeder(route_obj["xp"], is_forced_update)
             await process_points(xp_feeder, True, global_catch_feed_, cm, sm, wm, travel_time, worker, phase,
-                                 CatchConditions.grind_condition(), receive_broadcasts=False)
+                                 receive_broadcasts=False)
 
     if args.final_system_id:
         await db_set_system_id(worker.name(), args.final_system_id)

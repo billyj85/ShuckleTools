@@ -205,7 +205,7 @@ class FeedWorker(BasicFeeder):
                 return 120
 
         gym_pos = gym.latitude, gym.longitude
-        gym_get_info = self.worker.do_gym_get_info(pos, gym_pos, id_)
+        gym_get_info = await self.worker.do_gym_get_info(pos, gym_pos, id_)
         gym_get_info_data = gym_get_info["responses"]["GYM_GET_INFO"]
         self.gym_name = as_str(gym_get_info_data.name)
 

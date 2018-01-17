@@ -207,6 +207,12 @@ class MapElements(object):
     def filter(self, type):
         return MapElements([f for f in self.elements if f.element_type() == type])
 
+    def without_element_ids(self, ids):
+        return MapElements([ x for x in self.elements if x.id not in ids])
+
+    def __add__(self, another_map_elements):
+        return MapElements(self.elements + another_map_elements.elements)
+
     def gpx_route(self):
         return "\n".join([x.gpx_string() for idx, x in enumerate(self.elements)])
 
@@ -238,6 +244,7 @@ class MapElements(object):
                 if point_longitude > cutoff_long[1]:
                     break
                 point.add_neighbours(point2, distance)
+        return self
 
     def find_largest_groups(self, min_size=3):
         log = logging.getLogger(__name__)

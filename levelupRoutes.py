@@ -47,17 +47,16 @@ def filter_too_close(points):
 
 
 def create_spawnpoint_route(fence_filtered, used_pokestops, gpx_filename, radius=39, target_positions=360*3):
-    spawnpoint_elements = fence_filtered.filter( ElementType.SPAWNPOINT)
+    stops = fence_filtered.filter(ElementType.POKESTOP).without_element_ids(used_pokestops).update_distances(radius)
+    groups_of_unused_stops = stops.find_largest_groups(min_size=3)
 
-    #pokestop_list = filter_map_elements(fence_filtered, ElementType.POKESTOP)
-    #unused_stops = [ x for x in pokestop_list if x.id not in used_pokestops]
-    #update_distances(unused_stops, radius)
-    #extra_stops = find_largest_groups(unused_stops, min_size=2)
-    #combined = extra_stops + spawnpoint_elements
-    # catch radiusfor spawnpoints
-    spawnpoints = create_spawnpoint_model(spawnpoint_elements, args, radius=55)
-    route_elements = spawnpoints.find_largest_groups(4)
-    spawnpoint_route = find_optimal_route_brute_force(route_elements, target_positions=target_positions)
+    spawnpoints = create_spawnpoint_model(fence_filtered.filter(ElementType.SPAWNPOINT), args, radius=55)
+    spawnpoints_grouped = spawnpoints.find_largest_groups(4)
+
+    combined = spawnpoints_grouped + groups_of_unused_stops
+
+    spawnpoint_route = find_optimal_route_brute_force(combined, target_positions=target_positions)
+
     spawnpoint_route.write_gpx_route(gpx_filename)
     # clear off the actual spawnpoint since we dont use them. Somewhat odd :)
     elems = [RouteElement.from_coordinate(xz.coords) for xz in spawnpoint_route]

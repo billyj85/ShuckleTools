@@ -16,7 +16,7 @@ async def start():
     fence_filtered = location_elements.fence_filtered(fence("HamburgRight"))
     radius = 39
 
-    # temp_dud = create_spawnpoint_route(fence_filtered,set(), "spawnpoint_route_hr.gpx", radius)
+    temp_dud = create_spawnpoint_route(fence_filtered,set(), "spawnpoint_route_hr.gpx", radius)
 
     xp_route_right = create_xp_route(fence_filtered, "hbg_right", radius)
     used_pokestops = pokestop_ids(xp_route_right)

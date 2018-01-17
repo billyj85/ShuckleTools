@@ -5,10 +5,9 @@ import os
 from argparser import basic_std_parser, add_geofence, setup_default_app
 from geofence import get_geofences
 from geography import lat_routed
-from levelup_tools import find_xp_route, write_gpx_route, distance_route_locs_m
-from mapelements import RouteElement, ElementType, MapElements
-from mapelement_tools import find_optimal_location, create_pokestop_model, create_spawnpoint_model, \
-    load_map_elements, filter_map_elements
+from levelup_tools import distance_route_locs_m, find_optimal_route_brute_force
+from mapelements import RouteElement, ElementType
+from mapelement_tools import find_optimal_location, create_spawnpoint_model
 
 dirname = os.path.dirname(os.path.realpath(__file__))
 
@@ -48,7 +47,7 @@ def filter_too_close(points):
 
 
 def create_spawnpoint_route(fence_filtered, used_pokestops, gpx_filename, radius=39, target_positions=360*3):
-    spawnpoint_elements = filter_map_elements(fence_filtered, ElementType.SPAWNPOINT)
+    spawnpoint_elements = fence_filtered.filter( ElementType.SPAWNPOINT)
 
     #pokestop_list = filter_map_elements(fence_filtered, ElementType.POKESTOP)
     #unused_stops = [ x for x in pokestop_list if x.id not in used_pokestops]
@@ -57,19 +56,13 @@ def create_spawnpoint_route(fence_filtered, used_pokestops, gpx_filename, radius
     #combined = extra_stops + spawnpoint_elements
     # catch radiusfor spawnpoints
     spawnpoints = create_spawnpoint_model(spawnpoint_elements, args, radius=55)
-
-    spawnpoint_route = find_xp_route(spawnpoints, target_positions=target_positions, min_size=4 )
-    write_gpx_route(gpx_filename, spawnpoint_route)
-
-    # clear off the actual points since we dont use them
+    route_elements = spawnpoints.find_largest_groups(4)
+    spawnpoint_route = find_optimal_route_brute_force(route_elements, target_positions=target_positions)
+    spawnpoint_route.write_gpx_route(gpx_filename)
+    # clear off the actual spawnpoint since we dont use them. Somewhat odd :)
     elems = [RouteElement.from_coordinate(xz.coords) for xz in spawnpoint_route]
     return elems
 
-
-def create_boost_xp_route(pokestop_list, gpx_filename, target_positions=190):
-    xp_route_1 = find_xp_route(pokestop_list, target_positions=target_positions, min_size=2 )
-    write_gpx_route(gpx_filename, xp_route_1)
-    return xp_route_1
 
 def pokestop_ids(xp_route):
     result = set()
@@ -92,19 +85,13 @@ def create_one(pokestop_list, fence):
     with_spawns = [x + (loc_find_optimal_location(x[1].coords),) for x in spaced]
     return with_spawns
 
-def create_pokestop_list(file_name, fence):
-    me = load_map_elements(file_name)
-    pokestops = filter_map_elements(me, ElementType.POKESTOP)
-    stops = fence.filter_forts(pokestops)
-    return create_pokestop_model(stops, args)
-
-
 def create_xp_route(fence_elements, gpx_name_root, radius=39):
-    pokestop_list = filter_map_elements(fence_elements, ElementType.POKESTOP)
-    MapElements.update_distances(pokestop_list, radius)
-
-    xp_route_initial = create_boost_xp_route(pokestop_list, gpx_name_root + "_xp.gpx", 190)
-    return xp_route_initial
+    pokestop_list = fence_elements.filter(ElementType.POKESTOP)
+    pokestop_list.update_distances(radius)
+    route_elements = pokestop_list.find_largest_groups(2)
+    xp_route_1 = find_optimal_route_brute_force(route_elements, target_positions=190)
+    # xp_route_1.write_gpx_route(gpx_name_root + "_xp.gpx")
+    return xp_route_1
 
 def fence(name):
     return get_geofences(dirname + "/levelup_fences.txt", [name])

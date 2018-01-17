@@ -193,9 +193,19 @@ class MapElements(object):
     </gpx>
     """
 
+
     def __init__(self, elements) -> None:
         super().__init__()
         self.elements = elements
+
+    def __iter__(self):
+        return self.elements.__iter__()
+
+    def fence_filtered(self, fence):
+        return MapElements(fence.filter_map_elements(self.elements))
+
+    def filter(self, type):
+        return MapElements([f for f in self.elements if f.element_type() == type])
 
     def gpx_route(self):
         return "\n".join([x.gpx_string() for idx, x in enumerate(self.elements)])
@@ -213,35 +223,34 @@ class MapElements(object):
             result = max(result, len(poke_stop.collected_neighbours()))
         return result
 
-    @staticmethod
-    def update_distances(point_list, radius=39):
+
+    def update_distances(self, radius=39):
         distance = 2 * radius
-        for idx, point in enumerate(point_list):
+        for idx, point in enumerate(self.elements):
             point.neighbours = []
 
-        for idx, point in enumerate(point_list):
+        for idx, point in enumerate(self.elements):
             if idx % 500 == 0:
                 print("Processing point at index " + str(idx))
             cutoff_long = step_position(point.coords, 0, distance)
-            for point2 in islice(point_list, idx + 1, None):
+            for point2 in islice(self.elements, idx + 1, None):
                 point_longitude = point2.coords[1]
                 if point_longitude > cutoff_long[1]:
                     break
                 point.add_neighbours(point2, distance)
 
-    @staticmethod
-    def find_largest_groups(point_list, min_size=3):
+    def find_largest_groups(self, min_size=3):
         log = logging.getLogger(__name__)
 
         all_coords = {}
-        for stop in point_list:
+        for stop in self.elements:
             all_coords[stop.coords] = stop
 
         result_coords = []
         num_stops_found = 0
-        max_stop_group = MapElements.find_largest_stop_group(point_list)
+        max_stop_group = MapElements.find_largest_stop_group(self.elements)
         for counter in range(max_stop_group, min_size - 1, -1):
-            for poke_stop_ in point_list:
+            for poke_stop_ in self.elements:
                 intersected_ = poke_stop_.collected_neighbours()
                 if len(intersected_) == counter and poke_stop_.coords in all_coords:
                     locations = [n.coords for n in intersected_]
@@ -254,8 +263,8 @@ class MapElements(object):
                     # clear out neighbours so they dont contribute to further collected_neighhbours
                     for stop in intersected_:
                         stop.neighbours = []
-        log.info("Found {} stops".format(str(num_stops_found)))
-        return result_coords
+        log.info("Found {} elements with minimal group size {}".format(str(num_stops_found), str(min_size)))
+        return MapElements(result_coords)
 
     @staticmethod
     def with_bogus_altitude(elements):

@@ -29,7 +29,7 @@ queue = []
 
 allgyms = all_gyms()
 fences = get_geofences("geofence.txt", ["OsloInnenforRing3"])
-filtered = fences.filter_forts(allgyms)
+filtered = fences.filter_map_elements(allgyms)
 add_altitudes(filtered, args.gmaps_key)
 elements = GymElement.from_db_rows(filtered)
 

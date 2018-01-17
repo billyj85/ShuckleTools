@@ -1,7 +1,5 @@
 import asyncio
 import logging
-import numbers
-import threading
 
 from geography import step_position, move_in_direction_of
 from mapelements import MapElements
@@ -70,31 +68,12 @@ def is_encounter_to(tuple_to_use):
 def is_array_pokestops(tuple_to_use):
     return isinstance(tuple_to_use[1], list)
 
-
-
 def is_plain_coordinate(tuple_to_use):
     return len(tuple_to_use) == 3 and type(tuple_to_use[0]) is not tuple
 
 
-def as_coordinate(global_feed_map_pokemon, fallback_altitude):
-    return global_feed_map_pokemon.latitude, global_feed_map_pokemon.longitude, fallback_altitude
-
-
-def gpx_string(combined, pos=None):
-    """  <trkpt lat="47.644548" lon="-122.326897">"""
-    combined_ = "<trkpt lat='" + str(combined.coords[0]) + "' lon='" + str(combined.coords[1]) +"'"
-    if pos:
-        return combined_ + "><name>" + str(pos) +"</name></trkpt>"
-    else:
-        return combined_ + "/>"
-
-
 def distance_route_locs_m(loc1, loc2):
     return equi_rect_distance_m(loc1[0], loc2[0])
-
-
-def gpx_route(route):
-    return "\n".join([gpx_string(x, idx) for idx, x in enumerate(route)])
 
 
 def stop_string(combined):
@@ -111,44 +90,16 @@ def xp_stop_string(xp_tuple):
 def location_string(pos):
     return "(" + precise_coordinate_string(pos) +")"
 
-def as_gpx(route):
-    return initial_gpx + gpx_route(route) + post_gpx
-
-def write_gpx_route(filename, xp_route):
-    with open(filename, "w") as text_file:
-        text_file.write(as_gpx(xp_route))
-
-
 def back_to_route_elements(route_map, route_elements):
     result = []
     for i in range(0, len(route_map)):
         pos = route_map[i]
         result.extend(filter(lambda e: e.coords[0] == pos[0] and e.coords[1] == pos[1], route_elements))
-    return result
+    return MapElements(result)
 
-def find_xp_route(point_list, target_positions, min_size=2 ):
-    route_elements = MapElements.find_largest_groups(point_list, min_size)
+def find_optimal_route_brute_force(route_elements, target_positions):
     best_distance, best_route = find_best([x.as_latlon_object() for x in route_elements], target_positions)
     return back_to_route_elements( best_route, route_elements)
 
 def exclusion_pokestops(list_):
     return {y[1] for x in list_ for y in x[1]}
-
-
-initial_gpx="""
-<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.0">
-	<name>Example gpx</name>
-	<trk><name>Example gpx</name><number>1</number><trkseg>
-"""
-
-post_gpx = """
-	</trkseg></trk>
-</gpx>
-"""
-
-if __name__ == "__main__":
-    from pokestoproutesv2 import routes_p1
-    hbg = routes_p1.get("hamburg")
-    for route_elem in hbg:
-        print(str(precise_coordinate_string(route_elem[0])))

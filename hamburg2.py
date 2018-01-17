@@ -11,7 +11,7 @@ sys.setrecursionlimit(10000)
 
 async def start():
     location_elements = load_map_elements("hamburg_source_data.txt")
-    fence_filtered = fence("HamburgLeft").filter_forts(location_elements)
+    fence_filtered = location_elements.fence_filtered(fence("HamburgLeft"))
     radius = 39
     xp_route_left = create_xp_route(fence_filtered, "hbg_left", radius)
     write_file( "hamburg_xp2.py", "xp_route_2", str(xp_route_left))

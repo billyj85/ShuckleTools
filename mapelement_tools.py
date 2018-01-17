@@ -25,13 +25,6 @@ from scannerutil import equi_rect_distance_m, second_of_hour
 log = logging.getLogger(__name__)
 
 
-def create_pokestop(stop):
-    latitude_ = stop["latitude"]
-    longitude_ = stop["longitude"]
-    altitude_ = stop["altitude"]
-    return Pokestop(stop["pokestop_id"], latitude_, longitude_, altitude_)
-
-
 def create_elem(id, type, lat, lng, alt):
     if type == "P":
         return Pokestop(id, lat, lng, alt)
@@ -56,7 +49,7 @@ def load_map_elements(inputFile, sep=",", commentaryMarker="#"):
             lon = float(parts[3])
             alt = float(parts[4]) if parts[4] != "None" else 5.5  # todo. Look at this
             data.append(create_elem(id, type, lat, lon, alt))
-    return data
+    return MapElements(data)
 
 def create_spawnpoint(point):
     return SpawnPoint.create(point.id, point[0], point[1], point[2])
@@ -84,18 +77,10 @@ def add_altitudes(stops, gmaps_key):
     return stops
 
 
-def create_pokestop_model(stops_to_check, args, radius=39):
-    add_altitudes(stops_to_check, args.gmaps_key)
-    point_list = create_pokestops(stops_to_check)
-    MapElements.update_distances(point_list, radius)
-    return point_list
-
-
 def create_spawnpoint_model(stops_to_check, args, radius=39):
     add_altitudes(stops_to_check, args.gmaps_key)
-    point_list = create_spawnpoints(stops_to_check)
-    MapElements.update_distances(point_list, radius)
-    return point_list
+    stops_to_check.update_distances(radius)
+    return stops_to_check
 
 
 def create_spawnpoints(stops_to_check):
@@ -105,18 +90,11 @@ def create_spawnpoints(stops_to_check):
         point_list.append(pokestop)
     return point_list
 
-def create_pokestops(stops_to_check):
-    point_list = []
-    for stop in stops_to_check:
-        pokestop = create_pokestop(stop)
-        point_list.append(pokestop)
-    return point_list
-
 def filter_map_elements(map_elements, type):
     return [f for f in map_elements if f.element_type() == type]
 
 def fence_elements(map_elements, fence):
-    return fence.filter_forts(map_elements)
+    return fence.filter_map_elements(map_elements)
 
 
 def pokestops_in_fence(file, fence):

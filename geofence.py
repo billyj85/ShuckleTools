@@ -74,7 +74,7 @@ class Geofences(object):
         else:
             return self
 
-    def filter_forts(self, gyms):
+    def filter_map_elements(self, gyms):
         result = [loc for loc in gyms if self.within_fences(loc["latitude"], loc["longitude"])]
         log.info(u"There are {} elements within fence".format(str(len(result))))
         return result

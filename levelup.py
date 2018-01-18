@@ -12,7 +12,6 @@ from behaviours import beh_aggressive_bag_cleaning, discard_all_pokemon
 from catchmanager import CatchManager, CatchFeed, OneOfEachCatchFeed, Candy12Feed, CatchConditions
 from common_accountmanager import OutOfAccounts
 from getmapobjects import is_discardable, is_starter_pokemon, catchable_pokemon
-from levelup_tools import get_pos_to_use
 from management_errors import GaveUp
 from pogoservice import TravelTime, ApplicationBehaviour
 from pokestoproutesv2 import routes_all
@@ -112,6 +111,11 @@ async def next_worker():
     account = await account_manager.get_account()
     worker = wrap_account_no_replace(account, account_manager, int(args.fast_speed))
     return worker
+
+def get_pos_to_use(route_element):
+    if type(route_element) is tuple:
+        return route_element
+    return route_element.coords
 
 
 def exclusion_pokestops(list_):

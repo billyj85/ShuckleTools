@@ -1,4 +1,0 @@
-nohup python scanner.py 2>&1 >lgymwatcher.log &
-echo $! > gymwatcher.pid
-
-

@@ -9,10 +9,10 @@ from argparser import std_config, add_geofence, add_webhooks, add_search_rest, p
     add_threads_per_proxy, add_use_account_db_true, setup_default_app
 from async_accountdbsql import set_account_db_args, db_set_system_id
 from behaviours import beh_aggressive_bag_cleaning, discard_all_pokemon
-from catchmanager import CatchManager, CatchFeed, OneOfEachCatchFeed, Candy12Feed, NoOpFeed, CatchConditions
+from catchmanager import CatchManager, CatchFeed, OneOfEachCatchFeed, Candy12Feed, CatchConditions
 from common_accountmanager import OutOfAccounts
 from getmapobjects import is_discardable, is_starter_pokemon, catchable_pokemon
-from levelup_tools import get_pos_to_use, exclusion_pokestops, CountDownLatch
+from levelup_tools import get_pos_to_use
 from management_errors import GaveUp
 from pogoservice import TravelTime, ApplicationBehaviour
 from pokestoproutesv2 import routes_all
@@ -82,7 +82,7 @@ one_of_each_catch_feed = OneOfEachCatchFeed()
 candy_12_feed = Candy12Feed()
 
 
-async def safe_levelup(thread_num, global_catch_feed_, latch, forced_update_):
+async def safe_levelup(thread_num, global_catch_feed_, forced_update_):
     global num_completed
     while True:
         # noinspection PyBroadException
@@ -97,7 +97,8 @@ async def safe_levelup(thread_num, global_catch_feed_, latch, forced_update_):
             logging.info("Gave UP, exiting")
             return
         except:
-            worker.log.exception("Outer worker catch block caught exception")
+            if worker:
+                worker.log.exception("Outer worker catch block caught exception")
         finally:
             pass
             # await latch.count_down()
@@ -113,8 +114,11 @@ async def next_worker():
     return worker
 
 
-async def process_points(locations, xp_boost_phase, catch_feed, cm, sm, wm, travel_time, worker, phase, first_time=None,
-                         receive_broadcasts=True, pos_index=0):
+def exclusion_pokestops(list_):
+    return {y[1] for x in list_ for y in x[1]}
+
+
+async def process_points(locations, xp_boost_phase, cm, sm, wm, travel_time, worker, phase):
     first_loc = get_pos_to_use(locations[0])
     worker.log.info(u"First lof {}".format(str(first_loc)))
     map_objects = await wm.move_to_with_gmo(first_loc)
@@ -124,11 +128,11 @@ async def process_points(locations, xp_boost_phase, catch_feed, cm, sm, wm, trav
         await discard_all_pokemon(worker)
 
     excluded_stops = exclusion_pokestops(xp_route_1 + xp_route_2)
-    if first_time:
-        first_time()
     catch_condition = CatchConditions.grind_condition() if worker.account_info()["level"] >= 9 else CatchConditions.pre_l9_condition()
     catch_condition.log_description(phase)
     do_extra_gmo_after_pokestops = False
+
+    pos_index = 0
 
     for route_element, next_route_element in pairwise(locations):
         if await sm.reached_limits():
@@ -157,26 +161,6 @@ async def process_points(locations, xp_boost_phase, catch_feed, cm, sm, wm, trav
             candy_ = worker.account_info()["candy"]
             for evo in range(0, int(math.ceil(time_to_location / 1))):  # todo was 15 but we dont care any more
                 await cm.evolve_one(candy_, fast=True)
-
-        if receive_broadcasts:
-            while True:
-                encs = catch_feed.items[pos_index]
-                enc_pos = None
-                enc_id = None
-                for encounter_id in encs:
-                    if encounter_id not in cm.processed_encounters:
-                        enc_id = encounter_id
-                        enc_pos = encs[enc_id][0]
-                if not enc_id:
-                    break
-                worker.log.info(u"Dealing with nested location {}".format(str(enc_pos)))
-                await process_points([encs[enc_id][0], encs[enc_id][0]], xp_boost_phase, NoOpFeed(), cm, sm, wm,
-                                     travel_time, worker, phase, receive_broadcasts=False, pos_index=pos_index)
-                # i dont like these heuristics one damn bit
-                cm.processed_encounters.add(enc_id)  # this must be done in case there is nothing at the location
-                for encounter_id in encs:  # dump all other stuff reported from this location too, we'v been here.
-                    if encs[encounter_id][0] == enc_pos:
-                        cm.processed_encounters.add(encounter_id)
 
         slow_time_to_location = travel_time.slow_time_to_location(next_pos)
         use_fast = slow_time_to_location > 20
@@ -231,14 +215,12 @@ async def levelup(thread_num, worker, global_catch_feed_, is_forced_update, use_
         cm.catch_feed = global_catch_feed_
         await initial_stuff(grind_feed, wm, cm, worker)
         phase += 1
-        await process_points(grind_feed, False, global_catch_feed_, cm, sm, wm, travel_time, worker, phase,
-                             receive_broadcasts=False)
+        await process_points(grind_feed, False, cm, sm, wm, travel_time, worker, phase)
         await beh_aggressive_bag_cleaning(worker)
         phase += 1
         if not await sm.reached_limits():
             xp_feeder = PositionFeeder(route_obj["xp"], is_forced_update)
-            await process_points(xp_feeder, True, global_catch_feed_, cm, sm, wm, travel_time, worker, phase,
-                                 receive_broadcasts=False)
+            await process_points(xp_feeder, True, cm, sm, wm, travel_time, worker, phase)
 
     if args.final_system_id:
         await db_set_system_id(worker.name(), args.final_system_id)
@@ -253,9 +235,8 @@ async def startup():
     nthreads = int(args.thread_count)
     log = logging.getLogger(__name__)
     log.info(u"Bot using {} threads".format(str(nthreads)))
-    latch = CountDownLatch(nthreads)
     for i in range(nthreads):
-        asyncio.ensure_future(safe_levelup(i, global_catch_feed, latch, forced_update))
+        asyncio.ensure_future(safe_levelup(i, global_catch_feed, forced_update))
         if args.proxy and i % len(args.proxy) == 0:
             await asyncio.sleep(10)
 

@@ -9,7 +9,7 @@ from apiwrapper import EncounterPokemon
 from behaviours import beh_catch_encountered_pokemon, discard_all_pokemon
 from geography import move_towards
 from getmapobjects import catchable_pokemon_by_distance, pokemon_names
-from pogoservice import TravelTime
+from pogoservice import TravelTime, TravelTime2
 from pokemon_data import pokemon_name
 from scannerutil import equi_rect_distance_m
 
@@ -83,7 +83,7 @@ class CatchManager(object):
 
     def __init__(self, worker, catch_limit, fast=False):
         self.worker = worker
-        self.travel_time = worker.getlayer(TravelTime)
+        self.travel_time = worker.getlayer(TravelTime2)
 
         self.catch_limit = int(catch_limit)
         self.seen_pokemon = {}

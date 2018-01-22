@@ -280,7 +280,7 @@ async def lure_bomb_do_get(user, position, minutes, radius=50):
     db_move_to_levelup(args.system_id, "forlevelup")
     db_move_to_trash(args.system_id, "trash")
 
-    return web.Response(text="<h2>Luring at {}, be a little patitent. You have {} lures left</h2>".format(str(pos), str(remaining_lures)))
+    return web.Response(text="<h2>Luring at {}, be a little patitent. You have {} lures left</h2>".format(str(pos), str(remaining_lures)), content_type="text/html")
 
 def should_continue(minutes_to_run=120):
     end_at = datetime.now() + timedelta(minutes=minutes_to_run)

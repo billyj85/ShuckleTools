@@ -3,8 +3,10 @@ import asyncio
 import logging
 
 import math
+import os
 
 from accounts3 import AsyncAccountManager
+from allocateAccounts import write_monocle_accounts_file
 from argparser import std_config, add_geofence, add_webhooks, add_search_rest, parse_unicode, \
     add_threads_per_proxy, add_use_account_db_true, setup_default_app
 from async_accountdbsql import set_account_db_args, db_set_system_id
@@ -63,6 +65,8 @@ parser.add_argument('-am', '--alt-mode', default=False, action='store_true',
                     help='Alt mode')
 parser.add_argument('-ns', '--non-stop', default=False, action='store_true',
                     help='Run without stop')
+parser.add_argument('-aec', '--at-end-command', default=None,
+                    help='Command to fork at end')
 
 add_webhooks(parser)
 add_geofence(parser)
@@ -83,17 +87,23 @@ candy_12_feed = Candy12Feed()
 
 async def safe_levelup(thread_num, global_catch_feed_, forced_update_):
     global num_completed
+    worker = None
     while True:
         # noinspection PyBroadException
         try:
             worker = await next_worker()
             if worker:
                 await levelup(thread_num, worker, global_catch_feed_, forced_update_)
+                if args.at_end_command:
+                    account_file = "account{}.csv".format(str(thread_num))
+                    write_monocle_accounts_file([worker], account_file)
+                    worker.log.info("Running shell command {} {}".format(args.at_end_command, account_file))
+                    os.execvp(args.at_end_command, account_file)
         except OutOfAccounts:
             worker.log.info("No more accounts, exiting worker thread")
             return
         except GaveUp:
-            logging.info("Gave UP, exiting")
+            worker.log.info("Gave UP, exiting")
             return
         except:
             if worker:

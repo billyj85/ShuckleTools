@@ -79,11 +79,11 @@ def as_map(account):
     return res
 
 
-def write_monocle_accounts_file(accounts):
+def write_monocle_accounts_file(accounts, account_file):
     from collections import OrderedDict
     ordered_fieldnames = OrderedDict(
         [ ('username', None), ('password', None), ('provider', None), ('model', None), ('iOS', None), ('id', None)])
-    with open(args.accountcsv, 'w') as fou:
+    with open(account_file, 'w') as fou:
         dw = csv.DictWriter(fou, delimiter=',', fieldnames=ordered_fieldnames)
         dw.writeheader()
         for acct in accounts:
@@ -94,7 +94,7 @@ async def start():
     account_manager = AsyncAccountManager.create_empty(args, loop)
     accts = await find_accounts()
     if args.format == "monocle":
-        write_monocle_accounts_file(accts)
+        write_monocle_accounts_file(accts, args.accountcsv)
     else:
         write_rocketmap_accounts_file(accts)
 

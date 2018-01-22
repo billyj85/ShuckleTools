@@ -1,3 +1,4 @@
+import csv
 import datetime
 import logging
 import math
@@ -354,6 +355,20 @@ def stop_at_datetime(start_time_string, stop_time_string):
 def second_of_hour(time):
     return time.minute * 60 + time.second
 
+
+def write_monocle_accounts_file(accounts, account_file):
+    from collections import OrderedDict
+    ordered_fieldnames = OrderedDict(
+        [ ('username', None), ('password', None), ('provider', None), ('model', None), ('iOS', None), ('id', None)])
+    with open(account_file, 'w') as fou:
+        dw = csv.DictWriter(fou, delimiter=',', fieldnames=ordered_fieldnames)
+        dw.writeheader()
+        for acct in accounts:
+            dw.writerow(as_map(acct))
+
+def as_map(account):
+    res = {"username": as_str(account.name()), "password": as_str(account.password), "provider": account.auth_service}
+    return res
 
 def cmp_to_key(mycmp):
     'Convert a cmp= function into a key= function'

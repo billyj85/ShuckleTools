@@ -6,7 +6,6 @@ import math
 import os
 
 from accounts3 import AsyncAccountManager
-from allocateAccounts import write_monocle_accounts_file
 from argparser import std_config, add_geofence, add_webhooks, add_search_rest, parse_unicode, \
     add_threads_per_proxy, add_use_account_db_true, setup_default_app
 from async_accountdbsql import set_account_db_args, db_set_system_id
@@ -19,7 +18,7 @@ from pogoservice import TravelTime, ApplicationBehaviour
 from pokestoproutesv2 import routes_all
 from routes.hamburg_xp1 import xp_route_1
 from routes.hamburg_xp2 import xp_route_2
-from scannerutil import create_forced_update_check, pairwise
+from scannerutil import create_forced_update_check, pairwise, write_monocle_accounts_file
 from stopmanager import StopManager
 from workermanager import WorkerManager, PositionFeeder
 from workers import wrap_account_no_replace

@@ -1,4 +1,5 @@
 import asyncio
+import codecs
 import json
 import logging
 import os
@@ -230,15 +231,17 @@ async def sleep_if_outside_period(json_location):
         return True
 
 
-
+# noinspection PyUnusedLocal
 async def index(request):
-    user = request.request.match_info['user']
-    # web.Response()
-    return app.send_static_file("html/lureparty.html")
+    pokemon = os.path.dirname(os.path.abspath(os.path.realpath(__file__))) + "/static/html/lureparty.html"
+    with codecs.open(pokemon, "r", encoding="utf-8") as input_file:
+        data = input_file.read()
+        return web.Response(body=data, content_type="text/html")
 
 async def post_lure_request(request):
-    user = request.request.match_info['user']
-    projectpath = request.request.match_info['Position1']
+    user = request.match_info['user']
+    data = await request.post()
+    projectpath = data['Position1']
     return await lure_bomb_do_get( user, projectpath, 120)
 
 async def lure_bomb_radius_get(request):
@@ -246,7 +249,8 @@ async def lure_bomb_radius_get(request):
     position = request.match_info['position']
     minutes = request.match_info['minutes']
     radius = int(request.match_info['radius'])
-    return await lure_bomb_do_get(user, position, minutes,radius)
+    return await lure_bomb_dccccccgcdlttgniivveukglrjgttutdrtvthuubutnjg
+    o_get(user, position, minutes,radius)
 
 async def lure_bomb_get(request):
     user = request.match_info['user']
@@ -340,12 +344,10 @@ async def start():
 asyncio.ensure_future(start())
 if args.port:
     app = web.Application()
-    # app.router.add_static('/prefix', path_to_static_folder)
-    app.router.add_static('/lurebomb', dirname + "/static/html")
     app.router.add_resource('/lurebomb/{user}/').add_route('GET', index)
     app.router.add_resource('/lures/{user}/{position}/{minutes}').add_route('GET', lure_bomb_get)
     app.router.add_resource('/lures/{user}/{position}/{minutes}/{radius}').add_route('GET', lure_bomb_radius_get)
-    app.router.add_resource('/lures/{user}/lurebomb').add_route('POST', post_lure_request)
+    app.router.add_resource('/lurebomb/{user}/lurebomb').add_route('POST', post_lure_request)
     web.run_app(app, host=args.host, port=int(args.port))
 else:
     loop.run_forever()

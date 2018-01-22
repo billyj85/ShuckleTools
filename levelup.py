@@ -10,7 +10,7 @@ from argparser import std_config, add_geofence, add_webhooks, add_search_rest, p
     add_threads_per_proxy, add_use_account_db_true, setup_default_app
 from async_accountdbsql import set_account_db_args, db_set_system_id
 from behaviours import beh_aggressive_bag_cleaning, discard_all_pokemon
-from catchmanager import CatchManager, CatchConditions
+from catchmanager import CatchManager
 from common_accountmanager import OutOfAccounts
 from getmapobjects import is_discardable, is_starter_pokemon, catchable_pokemon
 from management_errors import GaveUp

@@ -11,8 +11,7 @@ from async_accountdbsql import upsert_account, db_consume_lures, db_set_rest_tim
     update_account_level, db_set_system_id, update_allocated, update_allocation_end, db_set_perm_banned, load_accounts
 
 from common_accountmanager import CommonAccountManager
-from management_errors import GaveUp
-from pogoservice import Account2, Account3
+from pogoservice import Account3
 from scannerutil import auth_service
 from simplecaptcha import handle_captcha_url
 
@@ -131,7 +130,7 @@ class AsyncAccountManager(CommonAccountManager):
         return inserted
 
     async def solve_captcha(self, account, captcha_url):
-        handle_captcha_url(self.args, self.status[account.status_name()],
+        await handle_captcha_url(self.args, self.status[account.status_name()],
                            account.pgoApi,
                            account.as_map(),
                            self.account_failures, self.account_captchas,

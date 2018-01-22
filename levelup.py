@@ -10,7 +10,7 @@ from argparser import std_config, add_geofence, add_webhooks, add_search_rest, p
     add_threads_per_proxy, add_use_account_db_true, setup_default_app
 from async_accountdbsql import set_account_db_args, db_set_system_id
 from behaviours import beh_aggressive_bag_cleaning, discard_all_pokemon
-from catchmanager import CatchManager, CatchFeed, OneOfEachCatchFeed, Candy12Feed, CatchConditions
+from catchmanager import CatchManager, CatchConditions
 from common_accountmanager import OutOfAccounts
 from getmapobjects import is_discardable, is_starter_pokemon, catchable_pokemon
 from management_errors import GaveUp
@@ -79,22 +79,20 @@ num_completed = 0
 account_manager = AsyncAccountManager.create_empty(args, loop)
 account_manager.reallocate = False
 
-global_catch_feed = CatchFeed()
-one_of_each_catch_feed = OneOfEachCatchFeed()
-candy_12_feed = Candy12Feed()
-
-
-async def safe_levelup(thread_num, global_catch_feed_, forced_update_):
+counter = 0
+async def safe_levelup(forced_update_):
     global num_completed
+    global counter
     worker = None
     while True:
         # noinspection PyBroadException
         try:
             worker = await next_worker()
             if worker:
-                await levelup(thread_num, worker, global_catch_feed_, forced_update_)
+                await levelup(worker, forced_update_)
                 if args.at_end_command:
-                    account_file = "account{}.csv".format(str(thread_num))
+                    account_file = "account{}.csv".format(str(counter))
+                    counter += 1
                     write_monocle_accounts_file([worker], account_file)
                     worker.log.info("Running shell command {} {}".format(args.at_end_command, account_file))
                     os.execvp(args.at_end_command, account_file)
@@ -165,7 +163,7 @@ async def process_points(locations, xp_boost_phase, cm, sm, wm, travel_time, wor
             map_objects = await wm.get_map_objects(player_location)
 
         sm.log_status(egg_active, wm.has_egg, wm.egg_number, pos_index, phase)
-        await cm.do_catch_moving(map_objects, player_location, next_pos, pos_index, catch_condition, wm.is_any_egg())
+        await cm.do_catch_moving(map_objects, player_location, next_pos, catch_condition, wm.is_any_egg())
         await cm.do_bulk_transfers()
 
         time_to_location = travel_time.time_to_location(next_pos)
@@ -184,7 +182,7 @@ async def process_points(locations, xp_boost_phase, cm, sm, wm, travel_time, wor
             do_extra_gmo_after_pokestops = len(catchable_pokemon(map_objects)) == 0
         else:
             async def catch_moving(po, mo):
-                cm.do_catch_moving(mo, po, next_pos, pos_index, catch_condition, wm.is_any_egg(), broadcast=False)
+                cm.do_catch_moving(mo, po, next_pos, catch_condition, wm.is_any_egg())
             map_objects = await wm.move_to_with_gmo(next_pos,is_fast_speed=use_fast, at_location=catch_moving )
             do_extra_gmo_after_pokestops = False
         await cm.do_bulk_transfers()
@@ -208,11 +206,11 @@ async def initial_stuff(feeder, wm, cm, worker):
     await cm.do_transfers()
 
 
-async def levelup(thread_num, worker, global_catch_feed_, is_forced_update, use_eggs=True):
+async def levelup(worker, is_forced_update, use_eggs=True):
     travel_time = worker.getlayer(TravelTime)
 
     wm = WorkerManager(worker, use_eggs, args.target_level)
-    cm = CatchManager(worker, args.catch_pokemon, global_catch_feed_)
+    cm = CatchManager(worker, args.catch_pokemon)
     sm = StopManager(worker, cm, wm, args.max_stops)
 
     app_behaviour = worker.getlayer(ApplicationBehaviour)
@@ -225,7 +223,6 @@ async def levelup(thread_num, worker, global_catch_feed_, is_forced_update, use_
         sm.clear_state()
         worker.log.info(u"Main grind PHASE {}".format(str(phaseNo)))
         wm.explain()
-        cm.catch_feed = global_catch_feed_
         await initial_stuff(grind_feed, wm, cm, worker)
         phase += 1
         await process_points(grind_feed, False, cm, sm, wm, travel_time, worker, phase)
@@ -249,7 +246,7 @@ async def startup():
     log = logging.getLogger(__name__)
     log.info(u"Bot using {} threads".format(str(nthreads)))
     for i in range(nthreads):
-        asyncio.ensure_future(safe_levelup(i, global_catch_feed, forced_update))
+        asyncio.ensure_future(safe_levelup(forced_update))
         if args.proxy and i % len(args.proxy) == 0:
             await asyncio.sleep(10)
 

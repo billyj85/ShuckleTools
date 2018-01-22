@@ -1,16 +1,12 @@
 import asyncio
-import numbers
 import logging
-from collections import defaultdict
-
-import datetime
-from datetime import timedelta
+import numbers
 
 from six import itervalues
 
 import pokemon_data
 from apiwrapper import EncounterPokemon
-from behaviours import beh_catch_encountered_pokemon, discard_all_pokemon, candy12
+from behaviours import beh_catch_encountered_pokemon, discard_all_pokemon
 from geography import move_towards
 from getmapobjects import catchable_pokemon_by_distance, pokemon_names
 from pogoservice import TravelTime
@@ -63,9 +59,6 @@ class CatchConditions:
         result.catch_50 = True
         return result
 
-    def is_candy_pokemon(self, pokemon_id):
-        return pokemon_id in pokemon_data.candy12 or pokemon_id in pokemon_data.candy25
-
     def is_candy_50_catch(self, pokemon_id):
         return self.catch_50 and pokemon_id in pokemon_data.candy50
 
@@ -82,17 +75,13 @@ class CatchConditions:
             "Catch conditions for phase {}: catch_anything={}, unseen_catch={}, candy_catch={}, candy12_catch={}".format(
                 str(phase), str(self.catch_anything), str(self.only_unseen), str(self.only_candy), str(self.only_candy_12)))
 
-location_visited = set()  # global state with a minor memory lea
-
-
 class CatchManager(object):
     preferred = {10, 13, 16, 19, 29, 32, 41, 69, 74, 92, 183}
     candy12 = pokemon_data.candy12
     candy25 = pokemon_data.candy25
     candy50 = pokemon_data.candy50
 
-    def __init__(self, worker, catch_limit, catch_feed_, fast=False):
-        self.catch_feed = catch_feed_
+    def __init__(self, worker, catch_limit, fast=False):
         self.worker = worker
         self.travel_time = worker.getlayer(TravelTime)
 
@@ -110,16 +99,13 @@ class CatchManager(object):
     def clear_state(self):
         self.processed_encounters = set()
 
-    def is_map_pokemon(self, location):
-        return "MapPokemon" in str(type(location))
-
     def is_caught_already(self, route_element):
         if type(route_element) is tuple:
             return False
         encounter_id = route_element.encounter_id
         return self.is_encountered_previously(encounter_id)
 
-    async def do_catch_moving(self, map_objects, player_pos, next_pos, pos_idx, catch_condition, is_egg_active, broadcast=True):
+    async def do_catch_moving(self, map_objects, player_pos, next_pos, catch_condition, is_egg_active):
         all_caught = {}
         if not self.is_within_catch_limit():
             self.worker.log.info(u"Catch limit {} exceeeded, not catching any more".format(str(self.catch_limit)))
@@ -144,8 +130,6 @@ class CatchManager(object):
             if encountered_previously:
                 self.worker.log.info(u"{} {} encountered previously".format(str(pokemon_name(pokemon_id)), str(encounter_id)))
             elif will_catch:
-                if broadcast and catch_condition.is_candy_pokemon(pokemon_id):
-                    self.catch_feed.append(player_pos, to_catch, pos_idx)
                 # log.debug("To_catch={}".format(str(to_catch)))
                 pokemon_distance_to_next_position = catch_list[0][0]
                 player_distance_to_next_position = equi_rect_distance_m(player_pos, next_pos)
@@ -177,7 +161,6 @@ class CatchManager(object):
                     str(candy_12_catch)))
                 caught = await self.catch_it(player_pos, to_catch, fast=True)
                 if caught:
-                    found_new = pokemon_id not in self.caught_pokemon_ids
                     self.caught_pokemon_ids.add(pokemon_id)
                     if isinstance(caught, numbers.Number):
                         all_caught[caught] = pokemon_id
@@ -197,13 +180,6 @@ class CatchManager(object):
 
     def synchronize_pokemon_inventory(self):
         discard_all_pokemon(self.worker)  # really simple algo :)
-
-
-    def is_first_at_location(self, pos):
-        if pos in location_visited:
-            return False
-        location_visited.add( pos)
-        return True
 
     def is_within_catch_limit(self):
         return self.pokemon_caught < self.catch_limit
@@ -316,53 +292,3 @@ class CatchManager(object):
                     probability.capture_probability)))
             else:
                 self.worker.log.info(u"Encounter {} failed, skipping".format(str(encounter_id)))
-
-
-class CatchFeed(object):
-    items = defaultdict(dict)
-
-    def append(self, player_postion, item, pos_idx):
-        if item.encounter_id not in self.items[pos_idx]:
-            log.info(u"CatchFeed Broadcasting {} encounter {} to other workers at pos {}".format(pokemon_name(item.pokemon_id),
-                                                                            str(item.encounter_id),str(pos_idx)))
-
-            self.items[pos_idx][item.encounter_id] = (player_postion, item)
-
-
-class OneOfEachCatchFeed(object):
-    items = defaultdict(dict)
-    seen = set()
-
-    def append(self, player_postion, item, pos_idx):
-        if item.pokemon_id not in self.seen:
-            log.info(u"OneofEachfeed Broadcasting {} encounter {} to other workers at pos {}".format(pokemon_name(item.pokemon_id),
-                                                                                                    str(item.encounter_id), str(pos_idx)))
-            self.seen.add(item.pokemon_id)
-            self.items[pos_idx][item.encounter_id] = (player_postion, item)
-
-
-class Candy12Feed(object):
-    items = defaultdict(dict)
-
-    def append(self, player_postion, item, pos_idx):
-        if item.pokemon_id in candy12 and item.encounter_id not in self.items[pos_idx]:
-
-            log.info(u"Candy12Broadcasting {} encounter {}@{} to other workers at pos {}".format(pokemon_name(item.pokemon_id),
-                                                                                                str(item.encounter_id),
-                                                                                                str((item.latitude,item.longitude)),
-                                                                                                str(pos_idx)))
-            self.items[pos_idx][item.encounter_id] = (player_postion, item)
-
-
-class PlainFeed(object):
-    items = defaultdict(dict)
-
-    def append(self, player_postion, item, pos_idx):
-        self.items[pos_idx][item.encounter_id] = (player_postion, item)
-
-
-class NoOpFeed(object):
-    items = {}
-
-    def append(self, player_postion, item, idx):
-        pass

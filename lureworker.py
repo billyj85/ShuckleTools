@@ -4,7 +4,8 @@ import logging
 import os
 from threading import Lock
 
-from async_accountdbsql import db_consume_lures, db_set_warned, db_set_perm_banned, db_set_logged_in_stats
+from async_accountdbsql import db_consume_lures, db_set_warned, db_set_perm_banned, db_set_logged_in_stats, \
+    db_set_temp_banned
 from getmapobjects import pokstops_within_distance, pokestop_detail
 from inventory import egg_count, lure_count
 from luredbsql import lures, db_consume_lure
@@ -223,7 +224,7 @@ class LureWorker(object):
         pokestops = await self.pokestops_at_coordinate(pos, map_objects, radius)
         if len(pokestops) == 0:
             log.warning("Could not find pokestops at {}, aborting".format(str(pos)))
-            db_set_perm_banned(self.worker.account_info(), datetime.datetime.now())
+            await db_set_perm_banned(self.worker.account_info(), datetime.datetime.now())
             return
 
         as_route = [ (x.latitude, x.longitude) for x in pokestops]
@@ -268,10 +269,11 @@ class LureWorker(object):
             map_objects = await self.worker_with_map_objects(pos=initial_pos)
             pokestops = pokstops_within_distance(map_objects, initial_pos, m)
             if len(pokestops) == 0 and retry:
-                log.warning("Still not seeing any pokestops, changing worker")
+                log.warning("Still not seeing any pokestops assuming some kind of ban, changing worker")
+                await db_set_temp_banned(self.worker.name(), datetime.datetime.now())
                 self.worker = None
                 map_objects = await self.worker_with_map_objects(pos=initial_pos)
-                return await self.pokestops_at_coordinate(initial_pos, m, map_objects, retry=False)
+                return await self.pokestops_at_coordinate(initial_pos, map_objects, m, retry=False)
 
         return pokestops
 

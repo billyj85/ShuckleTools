@@ -6,10 +6,8 @@ import sys
 from collections import defaultdict
 from datetime import datetime, timedelta
 from itertools import cycle
-from threading import Thread
 
-from flask import Flask, request
-from flask import abort
+from aiohttp import web
 
 from accounts3 import AsyncAccountManager
 from apiwrapper import CodenameResult
@@ -23,6 +21,7 @@ from luredbsql import set_lure_db_args, lures, db_move_to_levelup, db_move_to_tr
 from lureworker import LureWorker, FileLureCounter, DbLureCounter
 from pogom.fnord_altitude import with_gmaps_altitude
 from scannerutil import chunks, stop_at_datetime, start_at_datetime, is_blank
+dirname = os.path.dirname(os.path.realpath(__file__))
 
 parser = std_config("std_lureparty")
 add_search_rest(parser)
@@ -56,9 +55,6 @@ loop = asyncio.get_event_loop()
 setup_default_app(args, loop)
 log = logging.getLogger(__name__)
 
-app = Flask(__name__, static_url_path='')
-
-# set_gymdb_args(args)
 set_lure_db_args(args)
 
 db_move_to_levelup(args.system_id, "forlevelup")
@@ -234,19 +230,33 @@ async def sleep_if_outside_period(json_location):
         return True
 
 
-@app.route('/lurebomb/<user>/', methods=['GET'])
-def index(user):
+
+async def index(request):
+    user = request.request.match_info['user']
+    # web.Response()
     return app.send_static_file("html/lureparty.html")
 
+async def post_lure_request(request):
+    user = request.request.match_info['user']
+    projectpath = request.request.match_info['Position1']
+    return await lure_bomb_do_get( user, projectpath, 120)
 
-@app.route('/lurebomb/<user>/lurebomb', methods=['POST'])
-def release_accounts(user):
-    projectpath = request.form['Position1']
-    return lure_bomb_get( user, projectpath, 120)
+async def lure_bomb_radius_get(request):
+    user = request.match_info['user']
+    position = request.match_info['position']
+    minutes = request.match_info['minutes']
+    radius = int(request.match_info['radius'])
+    return await lure_bomb_do_get(user, position, minutes,radius)
+
+async def lure_bomb_get(request):
+    user = request.match_info['user']
+    position = request.match_info['position']
+    minutes = request.match_info['minutes']
+    radius = 50
+    return await lure_bomb_do_get(user, position, minutes,radius)
 
 
-@app.route('/lures/<user>/<position>/<minutes>', methods=['GET'])
-def lure_bomb_get(user, position, minutes, radius=50):
+async def lure_bomb_do_get(user, position, minutes, radius=50):
     global account_manager
     parsed = location_parse(position.strip())
     pos = with_gmaps_altitude(parsed, args.gmaps_key)
@@ -254,7 +264,7 @@ def lure_bomb_get(user, position, minutes, radius=50):
 
     lures1 = lures(user)
     if len(lures1) == 0:
-        abort(404)
+        web.Response(status=404)
     if pos is None:
         return "Missing coordinates for luring. Ensure page has location access and use a proper browser (safari/chromet etc, not the facebook browser)"
     max_lures = lures1[0]["max_lures"]
@@ -263,12 +273,11 @@ def lure_bomb_get(user, position, minutes, radius=50):
     if max_lures <= current_lures:
         return "All {} lures are spent".format(lures1.max_lures)
     ld = LureWorker(account_manager, fix_branding, should_continue(int(minutes)), DbLureCounter(user), args.lure_duration)
-    asyncio.set_event_loop(loop)
-    asyncio.ensure_future(ld.lure_bomb(pos, radius))
+    asyncio.ensure_future(ld.lure_bomb(pos, radius), loop=loop)
     db_move_to_levelup(args.system_id, "forlevelup")
     db_move_to_trash(args.system_id, "trash")
 
-    return "<h2>Luring at {}, be a little patitent. You have {} lures left</h2>".format(str(pos), str(remaining_lures))
+    return web.Response(text="<h2>Luring at {}, be a little patitent. You have {} lures left</h2>".format(str(pos), str(remaining_lures)))
 
 def should_continue(minutes_to_run=120):
     end_at = datetime.now() + timedelta(minutes=minutes_to_run)
@@ -277,14 +286,7 @@ def should_continue(minutes_to_run=120):
         return datetime.now() < end_at
     return cont
 
-def run_server():
-    log.info("Host {}, port {}".format(args.host, str(args.port)))
-    app.run(threaded=True, host=args.host, port=int(args.port))
 
-
-if args.port:
-    the_thread = Thread(name="LureServer", target=run_server)
-    the_thread.start()
 
 if args.geofence:
     geofence_stops = group_by_geofence(pokestops(), args.geofence, args.fencename)
@@ -336,4 +338,14 @@ async def start():
 
 
 asyncio.ensure_future(start())
-loop.run_forever()
+if args.port:
+    app = web.Application()
+    # app.router.add_static('/prefix', path_to_static_folder)
+    app.router.add_static('/lurebomb', dirname + "/static/html")
+    app.router.add_resource('/lurebomb/{user}/').add_route('GET', index)
+    app.router.add_resource('/lures/{user}/{position}/{minutes}').add_route('GET', lure_bomb_get)
+    app.router.add_resource('/lures/{user}/{position}/{minutes}/{radius}').add_route('GET', lure_bomb_radius_get)
+    app.router.add_resource('/lures/{user}/lurebomb').add_route('POST', post_lure_request)
+    web.run_app(app, host=args.host, port=int(args.port))
+else:
+    loop.run_forever()

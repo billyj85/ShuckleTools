@@ -1,12 +1,8 @@
-import unittest
-from datetime import datetime, timedelta
-from threading import Event
-
 import logging
+from datetime import datetime, timedelta
 
 from async_accountdbsql import db_set_egg_count
 from behaviours import beh_handle_level_up
-from catchmanager import PlainFeed
 from geography import move_towards
 from getmapobjects import catchable_pokemon
 from inventory import has_lucky_egg, egg_count, has_incense, incense_count
@@ -186,22 +182,3 @@ class PositionFeeder(object):
         self.route_elements[key] = value
 
 
-# set value (if needed)
-
-
-class TestPositonFeeder(unittest.TestCase):
-    def test(self):
-        coords = [1,2,3,4]
-        global_feed = PlainFeed()
-        center = PositionFeeder(coords, Event())
-        self.assertEqual(1, next(center))
-        self.assertEqual(2, next(center))
-        self.assertEqual(3, center.peek())
-        self.assertEqual(3, next(center))
-        self.assertEqual(4, next(center))
-        self.assertIsNone(center.peek())
-        try:
-             next(center)
-             self.fail("Should not come here")
-        except StopIteration:
-            pass

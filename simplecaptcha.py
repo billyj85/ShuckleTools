@@ -9,7 +9,7 @@ from datetime import datetime
 log = logging.getLogger(__name__)
 
 
-def handle_captcha_url(args, status, api, account, account_failures,
+async def handle_captcha_url(args, status, api, account, account_failures,
                        account_captchas, whq, captcha_url, step_location):
     try:
         if len(captcha_url) > 1:
@@ -34,7 +34,7 @@ def handle_captcha_url(args, status, api, account, account_failures,
                 return False
 
             if args.captcha_key and args.manual_captcha_timeout == 0:
-                if automatic_captcha_solve(args, status, api, captcha_url,
+                if await automatic_captcha_solve(args, status, api, captcha_url,
                                            account, whq):
                     return True
                 else:
@@ -67,7 +67,7 @@ def handle_captcha_url(args, status, api, account, account_failures,
 
 
 # Return True if captcha was succesfully solved
-def automatic_captcha_solve(args, status, api, captcha_url, account, wh_queue):
+async def automatic_captcha_solve(args, status, api, captcha_url, account, wh_queue):
     status['message'] = (
         'Account {} is encountering a captcha, starting 2captcha ' +
         'sequence.').format(account['username'])
@@ -102,7 +102,7 @@ def automatic_captcha_solve(args, status, api, captcha_url, account, wh_queue):
             'for {}.').format(account['username'])
         log.info(status['message'])
 
-        response = api.verify_challenge(token=captcha_token)
+        response = await api.verify_challenge(token=captcha_token)
         time_elapsed = now() - time_start
         if 'success' in response['VERIFY_CHALLENGE']:
             status['message'] = "Account {} successfully uncaptcha'd.".format(

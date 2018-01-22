@@ -317,6 +317,12 @@ async def claim_codename(api, account, name):
     return await send_generic_request(req, account)
 
 
+async def use_item_encounter(api, account, item, encounter_id, spawn_point_guid):
+    req = api.create_request()
+    req.use_item_encounter(item=item, encounter_id=encounter_id, spawn_point_guid=spawn_point_guid)
+    return await send_generic_request(req, account)
+
+
 @catchRequestException('catch pokemon')
 async def catch_pokemon(api, account, encounter_id, pokeball, normalized_reticle_size, spawn_point_id, hit_pokemon, spin_modifier, normalized_hit_position):
     x = ARPlusEncounterValues()

@@ -19,7 +19,7 @@ from management_errors import GaveUpApiAction
 from pogom.account import check_login, TooManyLoginAttempts, LoginSequenceFail, is_login_required
 from pogom.apiRequests import add_lure, claim_codename, fort_details, fort_search, level_up_rewards, release_pokemon, \
     recycle_inventory_item, set_favourite, gym_get_info, encounter, get_map_objects, use_item_xp_boost, \
-    AccountBannedException, evolve_pokemon, use_item_incense, catch_pokemon
+    AccountBannedException, evolve_pokemon, use_item_incense, catch_pokemon, use_item_encounter
 from pogom.utils import generate_device_info
 from scannerutil import nice_coordinate_string, nice_number, full_precision_coordinate_string, equi_rect_distance_m, distance_to_fort, fort_as_coordinate
 
@@ -483,14 +483,12 @@ class Account2(PogoService):
             return "(No name)"
         return name_
 
-    async def do_use_item_encounter(self, berry_id, encounter_id, spawn_point_guid):
+    async def do_use_item_encounter(self, item_id, encounter_id, spawn_point_guid):
         return await self.game_api_event(
-            self.pgoApi.use_item_encounter(
-                item=berry_id,
-                encounter_id=encounter_id,
-                spawn_point_guid=spawn_point_guid
-            ),
-            "use_item_encounter {}".format(str(berry_id)))
+            use_item_encounter(self.pgoApi, self.account_info(), item=item_id,
+                               encounter_id=encounter_id,
+                               spawn_point_guid=spawn_point_guid),
+            "use_item_encounter {}".format(str(item_id)))
 
     async def do_catch_pokemon(self, encounter_id, pokeball, normalized_reticle_size, spawn_point_id, hit_pokemon,
                          spin_modifier, normalized_hit_position):

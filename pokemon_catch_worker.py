@@ -101,7 +101,7 @@ class PokemonCatchWorker:
         new_catch_rate_by_ball = []
 
         response_dict = await self.pogoservice.do_use_item_encounter(
-            berry_id=berry_id,
+            item_id=berry_id,
             encounter_id=encounter_id,
             spawn_point_guid=self.spawn_point_guid
         )

@@ -249,8 +249,7 @@ async def lure_bomb_radius_get(request):
     position = request.match_info['position']
     minutes = request.match_info['minutes']
     radius = int(request.match_info['radius'])
-    return await lure_bomb_dccccccgcdlttgniivveukglrjgttutdrtvthuubutnjg
-    o_get(user, position, minutes,radius)
+    return await lure_bomb_do_get(user, position, minutes,radius)
 
 async def lure_bomb_get(request):
     user = request.match_info['user']

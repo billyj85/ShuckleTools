@@ -145,7 +145,7 @@ async def process_points(locations, xp_boost_phase, cm, sm, wm, travel_time, wor
 
     for route_element, next_route_element in pairwise(locations):
         if await sm.reached_limits():
-            worker.log.info(u"Reached limits inside processing"))
+            worker.log.info(u"Reached limits inside processing")
             return
 
         egg_active = await wm.use_egg(cm, xp_boost_phase)

@@ -91,7 +91,7 @@ async def safe_levelup(forced_update_):
                 if args.at_end_command:
                     account_file = "account{}.csv".format(str(counter))
                     counter += 1
-                    write_monocle_accounts_file([worker], account_file)
+                    write_monocle_accounts_file([{"username": worker.account_info().username, "password": worker.account_info().password, "provider": worker.account_info().auth_service}], account_file)
                     worker.log.info("Running shell command {} {}".format(args.at_end_command, account_file))
                     os.execvp(args.at_end_command, account_file)
         except OutOfAccounts:
@@ -237,7 +237,7 @@ async def levelup(worker, is_forced_update, use_eggs=True):
         await db_set_system_id(worker.name(), args.final_system_id)
         worker.log.info(u"Transferred account {} to system-id {}".format(worker.name(), args.final_system_id))
 
-    worker.log.info(u"Reached end of route with {} spins, going to rest".format(str(len(sm.spun_stops))))
+    worker.log.info(u"Reached end of routes with {} spins, going to rest".format(str(len(sm.spun_stops))))
 
 
 async def startup():

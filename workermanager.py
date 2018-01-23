@@ -158,7 +158,7 @@ class PositionFeeder(object):
 
     def next(self):
         if self.is_forced_update.isSet():
-            self.log.info("Forced update, qutting")
+            log.info("Forced update, qutting")
             raise StopIteration
 
         if self.pos >= len(self.route_elements):

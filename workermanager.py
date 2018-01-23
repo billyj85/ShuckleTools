@@ -6,7 +6,7 @@ from behaviours import beh_handle_level_up
 from geography import move_towards
 from getmapobjects import catchable_pokemon
 from inventory import has_lucky_egg, egg_count, has_incense, incense_count
-from pogoservice import TravelTime
+from pogoservice import TravelTime, TravelTime2
 from scannerutil import equi_rect_distance_m
 
 log = logging.getLogger(__name__)
@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 class WorkerManager(object):
     def __init__(self, worker, use_eggs, target_level):
         self.worker = worker
-        self.travel_time = worker.getlayer(TravelTime)
+        self.travel_time = worker.getlayer(TravelTime2)
         self.use_eggs = use_eggs
         self.next_egg = datetime.now()  # todo fix later
         self.egg_expiration = None

@@ -11,7 +11,7 @@ from gymdb import update_gym_from_details
 from gymdbsql import do_with_backoff_for_deadlock, create_or_update_gym_from_gmo2
 from inventory import total_iventory_count, egg_count, lure_count, inventory
 from management_errors import GaveUpApiAction
-from pogoservice import TravelTime
+from pogoservice import TravelTime, TravelTime2
 from pokemon_catch_worker import PokemonCatchWorker, WorkerResult
 from pokemon_data import pokemon_name
 from scannerutil import distance_to_fort, fort_as_coordinate, equi_rect_distance_m
@@ -152,7 +152,7 @@ async def beh_spin_nearby_pokestops(pogoservice, map_objects, position, range_m=
                               item_limits=None):
     spun = []
     spinning_distance_m = 39
-    travel_time = pogoservice.getlayer(TravelTime)
+    travel_time = pogoservice.getlayer(TravelTime2)
     old_speed = travel_time.get_speed()
     if map_objects:
         pokestops = inrange_pokstops_and_gyms(map_objects, position, range_m)

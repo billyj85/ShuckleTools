@@ -14,7 +14,7 @@ from catchmanager import CatchManager
 from common_accountmanager import OutOfAccounts
 from getmapobjects import is_discardable, is_starter_pokemon, catchable_pokemon
 from management_errors import GaveUp
-from pogoservice import TravelTime, ApplicationBehaviour
+from pogoservice import TravelTime, ApplicationBehaviour, TravelTime2
 from pokestoproutesv2 import routes_all
 from routes.hamburg_xp1 import xp_route_1
 from routes.hamburg_xp2 import xp_route_2
@@ -207,7 +207,7 @@ async def initial_stuff(feeder, wm, cm, worker):
 
 
 async def levelup(worker, is_forced_update, use_eggs=True):
-    travel_time = worker.getlayer(TravelTime)
+    travel_time = worker.getlayer(TravelTime2)
 
     wm = WorkerManager(worker, use_eggs, args.target_level)
     cm = CatchManager(worker, args.catch_pokemon)

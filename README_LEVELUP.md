@@ -1,32 +1,37 @@
-levelUp
+Welcome to ShuckleTools Documentation!
 =========
 
-Effectively bring accounts to a level 5/20/30 by looting pokestops and catching pokemon at a predefined set of locations. Not relly many config options. 
-With double xp the "fast-levelup" flag should be used, optionally also the "non-stop" flag to run until all accounts are done. 
+Effectively bring accounts to a level 5/20/30 by looting pokestops and catching pokemon at a predefined set of locations. Not really many config options. 
+When double xp events are running the "fast-levelup" flag should be used, optionally also the "non-stop" flag will run until all accounts are at desired level. 
 The sample config in the config folder is optimal.
 
-Installing
+Setting Up
 -------
-Only mysql is supported.
 
-Database schema is located at https://github.com/ShuckleHQ/RocketMap/blob/develop/database_scripts.md
+ShuckleTools only supports MySQL
 
-Assuming you have cloned into foobar/rm and your current directory is foobar. Copy rm/config/levelup.ini.example to levelup.ini, modify as appropriate
+Clone ShuckleTools  
 
-go into foobar/rm and run
+```
+git clone --
+```
+Copy /ShuckleTools/config/levelup.ini.example to levelup.ini, modify as appropriate
+
+Navigate to ./ShuckleTools/ and run
 
 ```
 pip3 install -r requirements.txt --upgrade
 ```
+Create Database or Tables in an existing RocketMap or Monocle DB the schema is located at https://github.com/ShuckleHQ/RocketMap/blob/develop/database_scripts.md
 
 
-Run 
+Loading Accounts into the Database 
 ```
-rm/bin/loadAccounts accountsfile.txt --system-id=your-bot-system-id
+ShuckleTools/bin/loadAccounts accountsfile.txt --system-id=your-bot-system-id
 ```
 
 
-Usage:
+Using levelUp:
 ```
 nohup levelUp &
 ```

@@ -78,6 +78,7 @@ class CatchConditions:
 class CatchManager(object):
     preferred = {10, 13, 16, 19, 29, 32, 41, 69, 74, 92, 183}
     candy12 = pokemon_data.candy12
+    candy12_evolvable = pokemon_data.candy12_evolvable
     candy25 = pokemon_data.candy25
     candy50 = pokemon_data.candy50
 
@@ -229,7 +230,7 @@ class CatchManager(object):
         candy = candy_.get(pokemon_id, 0)
         current_items = self.evolve_map.get(pokemon_id, [])
         next_candy = len(current_items) + 1
-        if pokemon_id in self.candy12 and candy >= (11 * next_candy + 1):
+        if pokemon_id in self.candy12_evolvable and candy >= (11 * next_candy + 1):
             current_items.append(pid)
             self.evolve_map[pokemon_id] = current_items
         elif pokemon_id in self.candy25 and candy >= (24 * next_candy + 1):

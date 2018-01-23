@@ -1,0 +1,10 @@
+db-type: mysql        # sqlite (default) or mysql
+db-host:          # required for mysql
+#db-port:               # required for mysql
+db-name:               # required for mysql
+db-user:               # required for mysql
+db-pass:
+
+# optionally to constrain search
+#fencefile: filename.txt
+#fencename: somefence-in-file

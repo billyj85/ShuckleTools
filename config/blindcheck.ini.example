@@ -1,0 +1,20 @@
+db-type: mysql        # sqlite (default) or mysql
+db-host: <hostname of db>         # required for mysql
+# db-port: <port>              # required for mysql
+db-name: <dbname>              # required for mysql
+db-user: <username>              # required for mysql
+db-pass: <password>
+
+# Misc
+gmaps-key: <your gmaps key>
+# rocketmap format
+accountcsv:  accounts-check.txt
+# somewhere with guaranteed "rares". Pick  a nice park :)
+# In the case that ALL your accounts come out blinded, you may want to verify that there actually are some
+# non-blinded pokemons at the location.
+location: 49.934394, 10.718147
+hash-key: [your-hash-key(s)]
+captcha-solving: True
+captcha-key: <your captcha key>
+proxy-file: proxies.txt
+threads-per-proxy: 5

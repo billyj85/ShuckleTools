@@ -1,0 +1,28 @@
+# run with python lureparty.py -cf lureparty.ini
+# see https://github.com/ShuckleHQ/RocketMap/blob/develop/README_TOOLS.md
+
+db-type: mysql        # sqlite (default) or mysql
+db-host: host              # required for mysql
+db-port: port              # required for mysql
+db-name: aDb              # required for mysql
+db-user: username              # required for mysql
+db-pass: password
+captcha-key: your-key
+gmaps-key: your-key
+hash-key: [your-hash]
+account-search-interval: 86400
+json-locations=locations.json
+# accounts will be branded to these names with number appended. max 12 chars
+base-name=[Lurz4ever,MoreLurz]
+# Owner in the database table
+system-id=demo_lureparty
+# rocketmap format: ptc,username,password
+accountcsv=accounts.txt
+# Uncomment host/port to expost on-demand lure service.
+#host=0.0.0.0
+#port=8701
+# the number of pokestops served by a single thread. Increasing number will reduce hash usage
+# but also increase delay between lures. Default is 5
+route-length: 10
+
+

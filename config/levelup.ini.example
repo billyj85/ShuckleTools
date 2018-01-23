@@ -1,0 +1,24 @@
+db-type: mysql        # sqlite (default) or mysql
+db-host:          # required for mysql
+#db-port:               # required for mysql
+db-name:              # required for mysql
+db-user:               # required for mysql
+db-pass:
+
+captcha-key: your-2-captcha-key
+gmaps-key: your-gmaps-key
+hash-key: your-bossland-key
+#accountcsv: acounts.txt
+system-id: levelup-bot
+# legal routes are hamburg
+route: hamburg
+proxy-file: proxies.txt
+# default threads is 5. Dont go above 7 per IP or you'll get bans
+thread-count: 7
+# default level is 5
+target-level: 20
+final-system-id: lures
+# run levelup in fast mode to reach 20/25 as quickly as possible
+fast-levelup
+# run until we're out of fresh accounts withthe non-stop flag
+non-stop

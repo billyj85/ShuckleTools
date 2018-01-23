@@ -1,6 +1,7 @@
 import logging
 
-from pogoservice import BanChecker, WorkingTimeScheduler, AccountReplacer, BlindChecker, TravelTime, CaptchaChecker, ApiDelay, ApplicationBehaviour
+from pogoservice import BanChecker, WorkingTimeScheduler, AccountReplacer, BlindChecker, CaptchaChecker, ApiDelay, \
+    ApplicationBehaviour
 
 log = logging.getLogger(__name__)
 
@@ -35,24 +36,21 @@ def wrap_account(account, account_manager):
     captcha_checker = CaptchaChecker(ban_checker, account_manager)
     blind_checker = BlindChecker(captcha_checker, account_manager, replacer)
     scheduler = WorkingTimeScheduler(blind_checker, account_manager.args.account_search_interval, replacer)
-    travel_time = TravelTime(scheduler)
-    return travel_time
+    return scheduler
 
 
 def wrap_account_no_replace(account, account_manager, fast_speed=25):
     api_delayed = ApiDelay(account)
     ban_checker = BanChecker(api_delayed, account_manager, None)
     captcha_checker = CaptchaChecker(ban_checker, account_manager)
-    travel_time = TravelTime(captcha_checker, fast_speed)
-    ab = ApplicationBehaviour(travel_time)
+    ab = ApplicationBehaviour(captcha_checker)
     return ab
 
 
 def wrap_accounts_minimal(account, account_manager):
     api_delayed = ApiDelay(account)
     captcha_checker = CaptchaChecker(api_delayed, account_manager)
-    travel_time = TravelTime(captcha_checker)
-    ab = ApplicationBehaviour(travel_time)
+    ab = ApplicationBehaviour(captcha_checker)
     return ab
 
 class DummyAccount(object):

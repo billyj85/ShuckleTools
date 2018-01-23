@@ -1,17 +1,16 @@
 import asyncio
 import datetime
-import logging
 import random
 
 from async_accountdbsql import db_set_account_level, db_set_egg_count, db_set_lure_count
 from geography import move_towards
-from getmapobjects import inrange_pokstops, inventory_discardable_pokemon, catchable_pokemon, find_pokestop, \
+from getmapobjects import inventory_discardable_pokemon, catchable_pokemon, find_pokestop, \
     inrange_pokstops_and_gyms, parse_gyms
 from gymdb import update_gym_from_details
-from gymdbsql import do_with_backoff_for_deadlock, create_or_update_gym_from_gmo2
+from gymdbsql import create_or_update_gym_from_gmo2
 from inventory import total_iventory_count, egg_count, lure_count, inventory
 from management_errors import GaveUpApiAction
-from pogoservice import TravelTime, TravelTime2
+from pogoservice import TravelTime2
 from pokemon_catch_worker import PokemonCatchWorker, WorkerResult
 from pokemon_data import pokemon_name
 from scannerutil import distance_to_fort, fort_as_coordinate, equi_rect_distance_m

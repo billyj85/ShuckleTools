@@ -6,7 +6,7 @@ from behaviours import beh_handle_level_up
 from geography import move_towards
 from getmapobjects import catchable_pokemon
 from inventory import has_lucky_egg, egg_count, has_incense, incense_count
-from pogoservice import TravelTime, TravelTime2
+from pogoservice import TravelTime2
 from scannerutil import equi_rect_distance_m
 
 log = logging.getLogger(__name__)

@@ -74,7 +74,7 @@ class PogoService(object):
     async def do_set_favourite(self, pokemon_uid, favourite):
         raise NotImplementedError("This is an abstract method.")
 
-    async def do_use_item_encounter(self, berry_id, encounter_id, spawn_point_guid):
+    async def do_use_item_encounter(self, item_id, encounter_id, spawn_point_guid):
         raise NotImplementedError("This is an abstract method.")
 
     async def do_catch_pokemon(self, encounter_id, pokeball, normalized_reticle_size, spawn_point_id, hit_pokemon,
@@ -182,8 +182,8 @@ class DelegatingPogoService(PogoService):
                                             hit_pokemon,
                                             spin_modifier, normalized_hit_position)
 
-    async def do_use_item_encounter(self, berry_id, encounter_id, spawn_point_guid):
-        return await self.target.do_use_item_encounter(berry_id, encounter_id, spawn_point_guid)
+    async def do_use_item_encounter(self, item_id, encounter_id, spawn_point_guid):
+        return await self.target.do_use_item_encounter(item_id, encounter_id, spawn_point_guid)
 
     def getlayer(self, type):
         return self if isinstance(self, type) else self.target.getlayer(type)
@@ -299,7 +299,7 @@ class Account2(PogoService):
         self.candy = {}
         self.applied_items = {}
         self.pgoApi = self.create_api(generate_device_info(identifier.encode("utf-8")))
-        self.travel_time = TravelTime2(self.log)
+        self.travel_time = TravelTime2(self)
 
     def reset_defaults(self):
         self['start_time'] = time.time()
@@ -316,7 +316,7 @@ class Account2(PogoService):
         self['last_timestamp_ms'] = 0
 
     def getlayer(self, type):
-        if isinstance(type, TravelTime2):
+        if type ==  TravelTime2:
             return self.travel_time
         return self if isinstance(self, type) else None
 
@@ -460,13 +460,7 @@ class Account2(PogoService):
 
     @staticmethod
     def __block_for_get_map_objects(self):
-        target = max(self.next_get_map_objects, self.next_gym_details)
-        current_timestamp = self.timestamp_ms()
-        #if current_timestamp < target:
-        #    ms_sleep = target - current_timestamp
-        #    to_sleep = math.ceil(ms_sleep / float(1000))
-        #    log.info(u"GMO blocker waiting for {}s".format(to_sleep))
-        #    time.sleep(to_sleep)
+        pass
 
     def __print_gym(self, gym):
         if gym is None:
@@ -1177,10 +1171,10 @@ class TravelTime2():
         self.prev_position = location
         self.positioned_at = datetime.now()
 
-    async def gmo_block(self, next_position):
+    def gmo_block(self, next_position):
         outer_class_self = self
 
-        class ControlledExecution:
+        class ControlledExecution():
             async def __aenter__(self):
                 await outer_class_self.sleep_for_account_travel(next_position)
                 outer_class_self.set_position(next_position)
@@ -1190,9 +1184,10 @@ class TravelTime2():
 
         return ControlledExecution()
 
-    async def fort_search_block(self, next_position):
+    def fort_search_block(self, next_position):
         outer_class_self = self
-        class ControlledExecution:
+
+        class ControlledExecution():
             async def __aenter__(self):
                 await outer_class_self.sleep_for_account_travel(next_position)
                 outer_class_self.set_position(next_position)
@@ -1202,10 +1197,10 @@ class TravelTime2():
 
         return ControlledExecution()
 
-    async def encounter_block(self, next_position):
+    def encounter_block(self, next_position):
         outer_class_self = self
 
-        class ControlledExecution:
+        class ControlledExecution():
             async def __aenter__(self):
                 await outer_class_self.sleep_for_account_travel(next_position)
                 outer_class_self.set_position(next_position)
@@ -1285,144 +1280,6 @@ class TravelTime2():
         elif delay > 0.1:
             # self.add_log(("Movement {}m, {}s, {} m/s, pos={} prev={} at {}".format(str(distance), str(delay), str(float(distance)/delay), str(next_location), str(self.prev_position), str(self.positioned_at))))
             self.worker.add_log(("Movement {}m, {}s, {} m/s, pos={}".format(str(distance), str(delay), str(float(distance) / delay), str(next_location))))
-        await asyncio.sleep(delay)
-
-
-class TravelTime(DelegatingPogoService):
-    """Handles travel time related constraint
-    """
-
-    def __init__(self, pogoservice, fast_speed=25):
-        DelegatingPogoService.__init__(self, pogoservice)
-        self.api_delay = self.getlayer(ApiDelay)
-        self.slow_speed = 9 # 32.5kmh
-        self.fast_speed = fast_speed
-        self.is_fast = False
-        self.use_fast = False
-        self.prev_position = None
-        self.positioned_at = None
-        self.latency_ms = None
-
-    def use_slow_speed(self):
-        self.is_fast = False
-
-    def get_speed(self):
-        return self.is_fast
-
-    def use_fast_speed(self):
-        self.is_fast = True
-
-    def set_fast_speed(self, is_fast):
-        self.is_fast = is_fast
-
-    def __set_position(self, location):
-        self.prev_position = location
-        self.positioned_at = datetime.now()
-
-    async def do_get_map_objects(self, position):
-        await self.__sleep_for_account_travel(position)
-        try:
-            return await super(TravelTime, self).do_get_map_objects(position)
-        finally:
-            self.__set_position(position)
-
-    async def do_spin_pokestop(self, fort, step_location):
-        await self.__sleep_for_account_travel(step_location)
-        try:
-            return await super(TravelTime, self).do_spin_pokestop(fort, step_location)
-        finally:
-            self.__set_position(step_location)
-
-    async def do_encounter_pokemon(self, encounter_id, spawn_point_id, step_location):
-        await self.__sleep_for_account_travel(step_location)
-        try:
-            return await super(TravelTime, self).do_encounter_pokemon(encounter_id, spawn_point_id, step_location)
-        finally:
-            self.__set_position(step_location)
-
-    def must_gmo(self):
-        return (dt.now() - self.positioned_at).total_seconds() > 30
-
-    def time_to_location(self, location):
-        if not self.prev_position:
-            return 0
-        return self.__priv_time_to_location(location)[1]
-
-    def speed_to_use(self):
-        return self.fast_speed if self.use_fast or self.is_fast else self.slow_speed
-
-    def meters_available_until_gmo(self):
-        """The number of meters we can move before violating speed limit"""
-        if not self.positioned_at:
-            return sys.maxint
-        earliest_next_gmo = self.api_delay.next_gmo
-        now = datetime.now()
-        if now < earliest_next_gmo:
-            total_seconds = (earliest_next_gmo - self.positioned_at).total_seconds()
-        else:
-            total_seconds = (now - self.positioned_at).total_seconds()
-        return total_seconds * self.speed_to_use()
-
-    def meters_available_right_now(self):
-        """The number of meters we can move before violating speed limit"""
-        if not self.positioned_at:
-            return sys.maxint
-        now = datetime.now()
-        total_seconds = (now - self.positioned_at).total_seconds()
-        return total_seconds * self.speed_to_use()
-
-    def slow_time_to_location(self, location):
-        if not self.prev_position:
-            return 0
-        distance = equi_rect_distance_m(self.prev_position, location)
-        seconds_since_last_use = dt.now() - self.positioned_at
-        remaining_m,time_r = self.__calc_time(distance, seconds_since_last_use, self.slow_speed)
-        return time_r
-
-
-    def __priv_time_to_location(self, location):
-        if not self.prev_position:
-            return 0
-        distance = equi_rect_distance_m(self.prev_position, location)
-        seconds_since_last_use = dt.now() - self.positioned_at
-        fast = False
-        remaining_m, time_r = self.__calc_time(distance, seconds_since_last_use, self.slow_speed)
-        if (time_r > 15 and self.use_fast) or self.is_fast:
-            remaining_m, time_r = self.__calc_time(distance, seconds_since_last_use, self.fast_speed)
-            fast = True
-        return distance, time_r, fast
-
-    def __calc_time(self, distance, seconds_since_last_use, speed):
-        remaining_m = distance - (seconds_since_last_use.total_seconds() * speed)
-        time_r = max(float(remaining_m) / speed, 0)
-        return remaining_m, time_r
-
-    def __log_info(self, msg):
-        log.info(u"%s:" + msg, self.name())
-
-    '''
-    Movement 180.310226106m, 16.0884855674s, 11.2074082642 m/s,
-    '''
-
-    def do_pokestop_details(self, fort):
-        now = datetime.now()
-        try:
-            return super(TravelTime, self).do_pokestop_details(fort)
-        finally:
-            if not self.latency_ms:
-                self.latency_ms = ((datetime.now() - now).microseconds) / 2000
-                log.info(u"Network latency measured to {}ms".format(self.latency_ms))
-
-    async def __sleep_for_account_travel(self, next_location):
-        if not self.prev_position:
-            return
-        distance, delay, fast = self.__priv_time_to_location(next_location)
-        if fast and delay > 0.1:
-            self.add_log(("FastMovement {}m, {}s, {} m/s".format(str(distance), str(delay), str(float(distance)/delay))))
-            # self.add_log(("FastMovement {}m, {}s, {} m/s, prev={} at {}".format(str(distance), str(delay), str(float(distance)/delay), str(self.prev_position), str(self.positioned_at))))
-        elif delay > 0.1:
-            # self.add_log(("Movement {}m, {}s, {} m/s, pos={} prev={} at {}".format(str(distance), str(delay), str(float(distance)/delay), str(next_location), str(self.prev_position), str(self.positioned_at))))
-            self.add_log(("Movement {}m, {}s, {} m/s, pos={}".format(str(distance), str(delay), str(float(distance) / delay), str(next_location))))
         await asyncio.sleep(delay)
 
 
@@ -1511,9 +1368,9 @@ class ApiDelay(DelegatingPogoService):
         return await self.run_delayed("recycle_inventory_item",
                                 super(ApiDelay, self).do_recycle_inventory_item(item_id, count))
 
-    async def do_use_item_encounter(self, berry_id, encounter_id, spawn_point_guid):
+    async def do_use_item_encounter(self, item_id, encounter_id, spawn_point_guid):
         return await self.run_delayed("use_item_encounter",
-                                super(ApiDelay, self).do_use_item_encounter(berry_id, encounter_id,
+                                super(ApiDelay, self).do_use_item_encounter(item_id, encounter_id,
                                                                                     spawn_point_guid))
 
     async def do_catch_pokemon(self, encounter_id, pokeball, normalized_reticle_size, spawn_point_id, hit_pokemon,
@@ -1621,12 +1478,3 @@ class BlindedAccount(BaseException):
 class WarnedAccount(BaseException):
     def __init__(self):
         pass
-
-
-class TravelTime_meters_available(unittest.TestCase):
-    def test(self):
-        tt = TravelTime(None, 18)
-        tt.positioned_at = datetime.now() - timedelta(seconds=2)
-        meters_avail = tt.meters_available_until_gmo()
-        self.assertTrue( meters_avail >= 18)
-        self.assertTrue( meters_avail < 100)  # cant really do this without timesource

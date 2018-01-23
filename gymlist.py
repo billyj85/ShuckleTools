@@ -1,5 +1,4 @@
 import asyncio
-
 import logging
 
 from accounts3 import AsyncAccountManager
@@ -9,11 +8,10 @@ from geofence import get_geofences
 from geography import step_position
 from getmapobjects import find_gym, inrange_gyms
 from gymdbsql import all_gyms
-from mapelements import GymElement
 from mapelement_tools import add_altitudes
-from pogoservice import TravelTime, TravelTime2
+from mapelements import GymElement
+from pogoservice import TravelTime2
 from workers import wrap_account
-
 
 parser = std_config("gymscanner")
 add_search_rest(parser)

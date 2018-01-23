@@ -226,9 +226,12 @@ async def levelup(worker, is_forced_update, use_eggs=True):
         await process_points(grind_feed, False, cm, sm, wm, travel_time, worker, phase)
         await beh_aggressive_bag_cleaning(worker)
         phase += 1
-        if not await sm.reached_limits():
-            xp_feeder = PositionFeeder(route_obj["xp"], is_forced_update)
-            await process_points(xp_feeder, True, cm, sm, wm, travel_time, worker, phase)
+        if sm.reached_limits():
+            break
+        xp_feeder = PositionFeeder(route_obj["xp"], is_forced_update)
+        await process_points(xp_feeder, True, cm, sm, wm, travel_time, worker, phase)
+        if sm.reached_limits():
+            break
 
     if args.final_system_id:
         await db_set_system_id(worker.name(), args.final_system_id)

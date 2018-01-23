@@ -120,7 +120,7 @@ async def check_login(args, account, api, proxy_url, proceed):
 # Simulate real app via login sequence.
 async def rpc_login_sequence(args, api, account, proceed):
     total_req = 0
-    app_version = 8700
+    app_version = 8900
 
     log = logging.LoggerAdapter(logging.getLogger(__name__), {'worker_name': account['username']})
 

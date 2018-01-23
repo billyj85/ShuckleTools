@@ -84,7 +84,7 @@ def timestamp_ms():
     return time.time() * 1000
 
 
-pogo_api_version = '0.87.5'
+pogo_api_version = '0.89.1'
 
 
 def check_forced_version(api_check_time, pause_bit, proxy_cycler):

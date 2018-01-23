@@ -23,7 +23,7 @@ def __parse_unicode(bytestring):
 
 def std_config(name):
     parser = std_pogo_api_config(name)
-    parser.add_argument('--api-version', default='0.87.5',
+    parser.add_argument('--api-version', default='0.89.1',
                         help=('API version currently in use.'))
     parser.add_argument('-novc', '--no-version-check', action='store_true',
                         help='Disable API version check.',

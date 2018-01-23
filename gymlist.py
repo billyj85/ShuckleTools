@@ -11,7 +11,7 @@ from getmapobjects import find_gym, inrange_gyms
 from gymdbsql import all_gyms
 from mapelements import GymElement
 from mapelement_tools import add_altitudes
-from pogoservice import TravelTime, TravelTime2
+from pogoservice import TravelTime
 from workers import wrap_account
 
 
@@ -39,7 +39,7 @@ async def start():
         account_manager = await AsyncAccountManager.create_standard(args, loop)
         account = await account_manager.get_account()
         worker = wrap_account(account, account_manager)
-        travel_time = worker.getlayer(TravelTime2)
+        travel_time = worker.getlayer(TravelTime)
         travel_time.use_fast_speed()
         for missing in missing_name:
             gym_pos= step_position(missing.coords, -1, 1)

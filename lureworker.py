@@ -105,7 +105,7 @@ class LureWorker(object):
             level = self.worker.account_info()["level"]
             await self.worker.do_collect_level_up(level)
             self.collected[self.worker.name()] = self.worker
-            await asyncio.sleep(10)
+            await asyncio.sleep(20)
             map_objects = await self.safe_get_map_objects(pos)
 
         while self.inventory.get(501, 0) == 0:

@@ -327,6 +327,7 @@ async def start():
     global account_manager
     account_manager = await AsyncAccountManager.create_standard(args, load_accounts_for_lures)
     account_manager.remove_accounts_without_lures()
+    asyncio.ensure_future(account_manager.refresh_loop(refresh_interval=60), loop=loop)
     if args.json_locations:
         log.info(u"Geofences are: {}".format(str(geofence_stops.keys())))
         with open(args.json_locations) as data_file:

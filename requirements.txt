@@ -31,3 +31,4 @@ psutil==5.3.1
 aiomysql>=0.0.9
 aiohttp>=2.1
 pogeo==0.3.*
+yarl==0.18.0

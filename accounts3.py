@@ -45,6 +45,22 @@ class AsyncAccountManager(CommonAccountManager):
         await account_manager.initialize(args.accountcsv, ())
         return account_manager
 
+    async def refresh_loop(self, refresh_interval=30):
+        while True:
+            await self.refresh()
+            await asyncio.sleep(refresh_interval)
+
+    async def refresh(self):
+        log.info("Checking for new accounts...")
+        new_accts = await self.__load_db_account_objects()
+        for acc in new_accts:
+            if not acc.username in self.status:
+                log.info("Added account {}".format(str(acc.username)))
+                self.accounts.append( acc)
+                self.status[acc.username] = acc.status_data()
+        self.sort_accounts()
+
+
     async def initialize(self, accounts_file, settings_accounts):
         file_accts = self.load_accounts(accounts_file)
 

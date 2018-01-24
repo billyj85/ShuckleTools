@@ -45,7 +45,7 @@ class AsyncAccountManager(CommonAccountManager):
         await account_manager.initialize(args.accountcsv, ())
         return account_manager
 
-    async def refresh_loop(self, refresh_interval=30):
+    async def refresh_loop(self, refresh_interval=60*15):
         while True:
             await self.refresh()
             await asyncio.sleep(refresh_interval)

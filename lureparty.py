@@ -274,7 +274,8 @@ async def lure_bomb_do_get(user, position, minutes, radius=50):
     current_lures = lures1[0].get("lures", 0)
     remaining_lures = max_lures - current_lures
     if max_lures <= current_lures:
-        return "All {} lures are spent".format(lures1.max_lures)
+        return web.Response(text= "<h1>All {} lures are spent, contact supplier :)</h1>".format(lures1.max_lures),
+                            content_type="text/html")
     ld = LureWorker(account_manager, fix_branding, should_continue(int(minutes)), DbLureCounter(user), args.lure_duration)
     asyncio.ensure_future(ld.lure_bomb(pos, radius), loop=loop)
     db_move_to_levelup(args.system_id, "forlevelup")

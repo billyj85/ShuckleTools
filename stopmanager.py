@@ -1,11 +1,13 @@
 from datetime import datetime, timedelta
 
+import logging
 from aiopogo.hash_server import HashServer
 
 from behaviours import beh_aggressive_bag_cleaning, beh_spin_pokestop, beh_spin_nearby_pokestops
 from inventory import inventory
 from scannerutil import nice_number_2
 
+log = logging.getLogger(__name__)
 
 class StopManager(object):
     def __init__(self, worker, catch_manager, worker_manager, max_stops):
@@ -88,12 +90,13 @@ class StopManager(object):
     async def reached_limits(self):
         if self.spun_stop_count > self.max_stops:
             self.worker.log.info(u"Reached target spins {}".format(str(self.spun_stop_count)))
-            print("Reached target spins")
+            log.info("Reached target spins")
             return True
         if await self.worker_manager.reached_target_level():
             self.worker.log.info(u"Reached target level")
-            print("Reached target level")
+            log.info("Reached target level")
             return True
+        log.info("Did not reach limit")
         return False
 
     def log_inventory(self):

@@ -26,11 +26,7 @@ from scannerutil import nice_coordinate_string, nice_number, full_precision_coor
 log = logging.getLogger("pogoserv")
 
 
-
 class PogoService(object):
-
-    def __init__(self):
-        self.log = logging.getLogger("pogoserv")
 
     async def do_gym_get_info(self, position, gym_position, gym_id):
         raise NotImplementedError("This is an abstract method.")
@@ -109,13 +105,13 @@ class PogoService(object):
         log.info(msg, args, kwargs)
 
     def log_info(self, msg, *args, **kwargs):
-        self.log.info(msg, args, kwargs)
+        raise NotImplementedError("This is an abstract method.")
 
     def log_debug(self, msg, *args, **kwargs):
-        self.log.debug(msg, args, kwargs)
+        raise NotImplementedError("This is an abstract method.")
 
     def log_error(self, msg, *args, **kwargs):
-        self.log.error(msg, args, kwargs)
+        raise NotImplementedError("This is an abstract method.")
 
 
 class DelegatingPogoService(PogoService):
@@ -203,8 +199,19 @@ class DelegatingPogoService(PogoService):
     def update_position(self, position):
         return self.target.update_position(position)
 
+    def log_info(self, msg, *args, **kwargs):
+        self.target.log_info(msg, *args, **kwargs)
+
+    def log_error(self, msg, *args, **kwargs):
+        self.target.log_error(msg, *args, **kwargs)
+
+    def log_debug(self, msg, *args, **kwargs):
+        self.target.log_debug(msg, *args, **kwargs)
+
     def account_info(self):
         return self.target.account_info()
+
+
 
 
 '''
@@ -257,7 +264,6 @@ class Account2(PogoService):
         self.allocated = False
         self.username = username
         self.password = password
-        self.log = logging.LoggerAdapter(logging.getLogger("pogoserv"), {'worker_name': username})
         self.auth_service = auth_service
         self.args = args
         self.search_interval = search_interval  # todo. use
@@ -630,6 +636,7 @@ class Account2(PogoService):
             'proxy_url': self.current_ptc_proxy,
         }
 
+
     def get(self, key, default):
         val = self[key]
         if val:
@@ -857,6 +864,15 @@ class Account2(PogoService):
     4: FAILED_POKEMON_CANNOT_EVOLVE
     5: FAILED_POKEMON_IS_DEPLOYED
     '''
+
+    def log_info(self, msg, *args, **kwargs):
+        self.log.info(msg, *args, **kwargs)
+
+    def log_error(self, msg, *args, **kwargs):
+        self.log.error(msg, *args, **kwargs)
+
+    def log_debug(self, msg, *args, **kwargs):
+        self.log.debug(msg, *args, **kwargs)
 
     async def do_use_lucky_egg(self):
         items_ = self.applied_items

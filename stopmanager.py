@@ -78,7 +78,7 @@ class StopManager(object):
             rem = HashServer.status.get('remaining', 0)
             ratio = float(self.catch_manager.pokemon_caught) / max(self.spun_stop_count,1)
             xp_30min_ago = self.worker_manager.xp_30_minutes_ago()
-            self.worker.log.info(u"P{}L{}, {}S/{}P//R{}, {}E/{}EW, {}XP/{}@30min{}{}, {}S@30min. idx={}, {} hash"
+            self.worker.log_info(u"P{}L{}, {}S/{}P//R{}, {}E/{}EW, {}XP/{}@30min{}{}, {}S@30min. idx={}, {} hash"
                      .format(str(phase), str(self.worker_manager.level), str(self.spun_stop_count),
                              str(self.catch_manager.pokemon_caught), str(nice_number_2(ratio)),
                              str(self.catch_manager.evolves),

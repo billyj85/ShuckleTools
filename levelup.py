@@ -20,6 +20,7 @@ from scannerutil import create_forced_update_check, pairwise, write_monocle_acco
 from stopmanager import StopManager
 from workermanager import WorkerManager, PositionFeeder
 from workers import wrap_account_no_replace
+from subprocess import call
 
 parser = std_config("levelup_default")
 add_search_rest(parser)
@@ -94,7 +95,7 @@ async def safe_levelup(forced_update_):
                     cmd_to_use = args.at_end_command.replace("$1", account_file)
                     write_monocle_accounts_file([worker.account_info()], account_file)
                     worker.log.info("Running shell command {}".format(cmd_to_use))
-                    os.execvp(cmd_to_use, ())
+                    call(cmd_to_use)
         except OutOfAccounts:
             worker.log.info("No more accounts, exiting worker thread")
             return

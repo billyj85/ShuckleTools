@@ -223,6 +223,7 @@ def setup_default_app(args, loop):
     loop.add_signal_handler(SIGINT, signal_handler)
     setup_logging(args.system_id)
     logging.getLogger("pogoservice").setLevel(logging.DEBUG)
+    logging.getLogger("pogoserv").setLevel(logging.DEBUG)
     log = logging.getLogger(__name__)
     log.setLevel(logging.DEBUG)
     args.player_locale = {'country': 'DE', 'language': 'de', 'timezone': 'Europe/Berlin'}

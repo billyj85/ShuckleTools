@@ -88,8 +88,11 @@ class StopManager(object):
     async def reached_limits(self):
         if self.spun_stop_count > self.max_stops:
             self.worker.log.info(u"Reached target spins {}".format(str(self.spun_stop_count)))
+            print("Reached target spins")
             return True
         if await self.worker_manager.reached_target_level():
+            self.worker.log.info(u"Reached target level")
+            print("Reached target level")
             return True
         return False
 

@@ -91,7 +91,7 @@ async def safe_levelup(forced_update_):
                 if args.at_end_command:
                     account_file = "account{}.csv".format(str(counter))
                     counter += 1
-                    write_monocle_accounts_file([{"username": worker.account_info().username, "password": worker.account_info().password, "provider": worker.account_info().auth_service}], account_file)
+                    write_monocle_accounts_file([worker.account_info()], account_file)
                     worker.log.info("Running shell command {} {}".format(args.at_end_command, account_file))
                     os.execvp(args.at_end_command, account_file)
         except OutOfAccounts:

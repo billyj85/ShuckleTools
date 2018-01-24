@@ -367,7 +367,7 @@ def write_monocle_accounts_file(accounts, account_file):
             dw.writerow(as_map(acct))
 
 def as_map(account):
-    res = {"username": as_str(account.name()), "password": as_str(account.password), "provider": account.auth_service}
+    res = {"username": as_str(account.username), "password": as_str(account.password), "provider": account.auth_service}
     return res
 
 def cmp_to_key(mycmp):

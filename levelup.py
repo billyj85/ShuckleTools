@@ -91,8 +91,9 @@ async def safe_levelup(forced_update_):
                 if args.at_end_command:
                     account_file = "account{}.csv".format(str(counter))
                     counter += 1
+                    cmd_to_use = args.at_end_command.replace("$1", account_file)
                     write_monocle_accounts_file([worker.account_info()], account_file)
-                    worker.log.info("Running shell command {} {}".format(args.at_end_command, account_file))
+                    worker.log.info("Running shell command {}".format(cmd_to_use))
                     os.execvp(args.at_end_command, account_file)
         except OutOfAccounts:
             worker.log.info("No more accounts, exiting worker thread")

@@ -80,6 +80,7 @@ class CatchManager(object):
     candy12 = pokemon_data.candy12
     candy12_evolvable = pokemon_data.candy12_evolvable
     candy25 = pokemon_data.candy25
+    candy25_evolvable = pokemon_data.candy25_evolvable
     candy50 = pokemon_data.candy50
 
     def __init__(self, worker, catch_limit, fast=False):
@@ -233,7 +234,7 @@ class CatchManager(object):
         if pokemon_id in self.candy12_evolvable and candy >= (11 * next_candy + 1):
             current_items.append(pid)
             self.evolve_map[pokemon_id] = current_items
-        elif pokemon_id in self.candy25 and candy >= (24 * next_candy + 1):
+        elif pokemon_id in self.candy25_evolvable and candy >= (24 * next_candy + 1):
             current_items.append(pid)
             self.evolve_map[pokemon_id] = current_items
         elif pokemon_id in self.candy50 and candy >= (49 * next_candy) + 1:

@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import math
-import os
 
 from accounts3 import AsyncAccountManager
 from argparser import std_config, add_geofence, add_webhooks, add_search_rest, parse_unicode, \
@@ -20,7 +19,6 @@ from scannerutil import create_forced_update_check, pairwise, write_monocle_acco
 from stopmanager import StopManager
 from workermanager import WorkerManager, PositionFeeder
 from workers import wrap_account_no_replace
-from subprocess import call
 
 parser = std_config("levelup_default")
 add_search_rest(parser)
@@ -90,12 +88,16 @@ async def safe_levelup(forced_update_):
             if worker:
                 await levelup(worker, forced_update_)
                 if args.at_end_command:
-                    account_file = "account{}.csv".format(str(counter))
-                    counter += 1
-                    cmd_to_use = args.at_end_command.replace("$1", account_file)
-                    write_monocle_accounts_file([worker.account_info()], account_file)
-                    worker.log.info("Running shell command {}".format(cmd_to_use))
-                    call(cmd_to_use)
+                    if worker.account_info()["level"] < int(args.target_level):
+                        worker.log.error("Account {} did not reach required level".format(str(worker.name())))
+                    else:
+                        account_file = "account{}.csv".format(str(counter))
+                        counter += 1
+                        cmd_to_use = args.at_end_command.replace("$1", account_file)
+                        write_monocle_accounts_file([worker.account_info()], account_file)
+                        worker.log.info("Running shell command {}".format(cmd_to_use))
+                        process = asyncio.create_subprocess_exec(cmd_to_use, loop=loop)
+                        await process.wait()
         except OutOfAccounts:
             worker.log.info("No more accounts, exiting worker thread")
             return

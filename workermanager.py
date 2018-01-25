@@ -112,7 +112,7 @@ class WorkerManager(object):
             if evolving_possible or xp_boost_phase:
                 await self.worker.do_use_lucky_egg()
                 self.egg_number += 1
-                self.next_egg = datetime.now() + timedelta(minutes=90)
+                self.next_egg = datetime.now() + timedelta(minutes=30)
                 self.egg_expiration = datetime.now() + timedelta(minutes=30)
                 await db_set_egg_count(self.worker.account_info().username, egg_count(self.worker))
             elif self.initial_fast_egg:

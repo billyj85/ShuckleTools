@@ -99,6 +99,15 @@ Lara can also use
 http://localhost:8701/laracroft/
 ```
 
+
+--Need clarification on Radious & see if GPS Position can be truncated ---
+
+'/lurebomb/{user}/
+'/lures/{user}/{position}/{minutes}')
+'/lures/{user}/{position}/{minutes}/{radius} in Meters 
+'/lurebomb/{user}/lurebomb').add_route('POST', post_lure_request)
+
+
 to lure from her current location. Please note that trailing slash.
 
 There is no "security" in the solution other than knowing the URL and the username. Hence it might make sense

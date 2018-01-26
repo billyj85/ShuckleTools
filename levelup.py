@@ -91,7 +91,7 @@ async def safe_levelup(forced_update_):
                     if worker.account_info()["level"] < int(args.target_level):
                         worker.log.error("Account {} did not reach required level".format(str(worker.name())))
                     else:
-                        account_file = "account{}.csv".format(str(counter))
+                        account_file = args.system_id + "{}.csv".format(str(counter))
                         counter += 1
                         cmd_to_use = args.at_end_command.replace("$1", account_file)
                         cmd_to_use = [

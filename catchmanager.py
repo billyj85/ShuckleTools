@@ -107,7 +107,7 @@ class CatchManager(object):
         encounter_id = route_element.encounter_id
         return self.is_encountered_previously(encounter_id)
 
-    async def do_catch_moving(self, map_objects, player_pos, next_pos, catch_condition, is_egg_active):
+    async def do_catch_moving(self, map_objects, player_pos, next_pos, catch_condition, is_egg_active, greedy=False):
         all_caught = {}
         if not self.is_within_catch_limit():
             self.worker.log.info(u"Catch limit {} exceeeded, not catching any more".format(str(self.catch_limit)))
@@ -161,7 +161,7 @@ class CatchManager(object):
                 self.worker.log.info(u"Catching {} because catch_all={} unseen={} candy_catch={} candy_12_catch={}".format(
                     pokemon_name(pokemon_id), str(catch_condition.catch_anything), str(unseen_catch), str(candy_catch),
                     str(candy_12_catch)))
-                caught = await self.catch_it(player_pos, to_catch, fast=True)
+                caught = await self.catch_it(player_pos, to_catch, fast=True, greedy=greedy)
                 if caught:
                     self.caught_pokemon_ids.add(pokemon_id)
                     if isinstance(caught, numbers.Number):
@@ -276,7 +276,7 @@ class CatchManager(object):
             await asyncio.sleep(17)
         return evo.evolved_pokemon_data.id
 
-    async def catch_it(self, pos, to_catch, fast=False):
+    async def catch_it(self, pos, to_catch, fast=False, greedy=False):
         encounter_id = to_catch.encounter_id
         spawn_point_id = to_catch.spawn_point_id
         pokemon_id = to_catch.pokemon_id
@@ -284,6 +284,7 @@ class CatchManager(object):
         encounter_response = await self.worker.do_encounter_pokemon(encounter_id, spawn_point_id, pos)
         probability = EncounterPokemon(encounter_response, encounter_id).probability()
         is_vip = pokemon_id in self.candy12 or pokemon_id in self.candy25
+        catch_prob = 0.45 if not greedy else 0.35
         if probability and len([x for x in probability.capture_probability if x > 0.43]) > 0:
             caught = await beh_catch_encountered_pokemon(self.worker, pos, encounter_id, spawn_point_id, probability,
                                                    pokemon_id, is_vip, fast)

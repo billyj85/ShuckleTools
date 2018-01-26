@@ -173,7 +173,7 @@ async def process_points(locations, xp_boost_phase, cm, sm, wm, travel_time, wor
             map_objects = await wm.get_map_objects(player_location)
 
         sm.log_status(egg_active, wm.has_egg, wm.egg_number, pos_index, phase)
-        await cm.do_catch_moving(map_objects, player_location, next_pos, catch_condition, wm.is_any_egg())
+        await cm.do_catch_moving(map_objects, player_location, next_pos, catch_condition, wm.is_any_egg(), greedy=xp_boost_phase)
         await cm.do_bulk_transfers()
 
         time_to_location = travel_time.time_to_location(next_pos)
@@ -192,7 +192,7 @@ async def process_points(locations, xp_boost_phase, cm, sm, wm, travel_time, wor
             do_extra_gmo_after_pokestops = len(catchable_pokemon(map_objects)) == 0
         else:
             async def catch_moving(po, mo):
-                cm.do_catch_moving(mo, po, next_pos, catch_condition, wm.is_any_egg())
+                cm.do_catch_moving(mo, po, next_pos, catch_condition, wm.is_any_egg(), greedy=xp_boost_phase)
             map_objects = await wm.move_to_with_gmo(next_pos,is_fast_speed=use_fast, at_location=catch_moving )
             do_extra_gmo_after_pokestops = False
         await cm.do_bulk_transfers()

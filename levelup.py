@@ -13,8 +13,11 @@ from getmapobjects import is_discardable, is_starter_pokemon, catchable_pokemon
 from management_errors import GaveUp
 from pogoservice import ApplicationBehaviour, TravelTime2
 from pokestoproutesv2 import routes_all
-from routes.hamburg_xp1 import xp_route_1
+from routes.hamburg_xp1 import hamburg_xp_route_1
 from routes.hamburg_xp2 import xp_route_2
+from routes.hamburg_xp3 import xp_route_3
+from routes.tokyo_xp1 import tokyo_xp_route_1
+from routes.tokyo_xp2 import tokyo_xp_route_2
 from scannerutil import create_forced_update_check, pairwise, write_monocle_accounts_file
 from stopmanager import StopManager
 from workermanager import WorkerManager, PositionFeeder
@@ -227,7 +230,7 @@ async def levelup(worker, is_forced_update, use_eggs=True):
     full_route = routes_all[args.route]
     phase = 0
 
-    excluded_stops = exclusion_pokestops(xp_route_1 + xp_route_2)
+    excluded_stops = exclusion_pokestops(tokyo_xp_route_1 + tokyo_xp_route_2 + hamburg_xp_route_1 + xp_route_2 + xp_route_3)
     for phaseNo, route_obj in enumerate(full_route):
         grind_feed = PositionFeeder(route_obj["grind"], is_forced_update)
         sm.clear_state()

@@ -138,7 +138,7 @@ def exclusion_pokestops(list_):
     return {y[1] for x in list_ for y in x[1]}
 
 
-async def process_points(locations, xp_boost_phase, cm, sm, wm, travel_time, worker, phase):
+async def process_points(locations, xp_boost_phase, cm, sm, wm, travel_time, worker, phase, excluded_stops):
     first_loc = get_pos_to_use(locations[0])
     worker.log.info(u"First lof {}".format(str(first_loc)))
     map_objects = await wm.move_to_with_gmo(first_loc)
@@ -147,7 +147,6 @@ async def process_points(locations, xp_boost_phase, cm, sm, wm, travel_time, wor
     if num_pokes > 250:
         await discard_all_pokemon(worker)
 
-    excluded_stops = exclusion_pokestops(xp_route_1 + xp_route_2)
     catch_condition = CatchConditions.grind_condition() if worker.account_info()["level"] >= 9 else CatchConditions.pre_l9_condition()
     catch_condition.log_description(phase)
     do_extra_gmo_after_pokestops = False
@@ -228,6 +227,8 @@ async def levelup(worker, is_forced_update, use_eggs=True):
 
     full_route = routes_all[args.route]
     phase = 0
+
+    excluded_stops = exclusion_pokestops(xp_route_1 + xp_route_2)
     for phaseNo, route_obj in enumerate(full_route):
         grind_feed = PositionFeeder(route_obj["grind"], is_forced_update)
         sm.clear_state()
@@ -235,13 +236,13 @@ async def levelup(worker, is_forced_update, use_eggs=True):
         wm.explain()
         await initial_stuff(grind_feed, wm, cm, worker)
         phase += 1
-        await process_points(grind_feed, False, cm, sm, wm, travel_time, worker, phase)
+        await process_points(grind_feed, False, cm, sm, wm, travel_time, worker, phase, excluded_stops)
         await beh_aggressive_bag_cleaning(worker)
         phase += 1
         if await sm.reached_limits():
             break
         xp_feeder = PositionFeeder(route_obj["xp"], is_forced_update)
-        await process_points(xp_feeder, True, cm, sm, wm, travel_time, worker, phase)
+        await process_points(xp_feeder, True, cm, sm, wm, travel_time, worker, phase, {})
         if await sm.reached_limits():
             break
 

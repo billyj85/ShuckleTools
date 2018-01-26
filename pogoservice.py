@@ -1327,7 +1327,7 @@ class ApiDelay(DelegatingPogoService):
         self.start_time_of_action = dt.now()
         try:
             return await func
-        except ServerSideRequestThrottlingException as e:
+        except ServerSideRequestThrottlingException as e:  # prolly useless since only bossland throws. InvalidRPC in this code.
             if self.end_time_of_action:
                 seconds_since_previous = (time_of_request - self.end_time_of_action).total_seconds()
                 log.warning(

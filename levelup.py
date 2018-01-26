@@ -103,7 +103,7 @@ async def safe_levelup(forced_update_):
                         args.at_end_command.replace("$1", account_file)
                         write_monocle_accounts_file([worker.account_info()], account_file)
                         worker.log.info("Running shell command {}",cmd_to_use)
-                        process = asyncio.create_subprocess_exec(cmd_to_use, loop=loop)
+                        process = asyncio.create_subprocess_exec(*cmd_to_use, loop=loop)
                         await process
         except OutOfAccounts:
             worker.log.info("No more accounts, exiting worker thread")

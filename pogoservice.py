@@ -444,11 +444,12 @@ class Account2(PogoService):
         self.pgoApi.set_position(*position)
 
     def __update_proxies(self, login=False):
-        hash_endpoint = 'http://pokehash.buddyauth.com'
-        if login and self.login_hash_generator:
-            self.pgoApi.activate_hash_server(next(self.login_hash_generator), hash_endpoint=hash_endpoint)
+        next_hash = next(self.login_hash_generator) if login and self.login_hash_generator else next(self.hash_generator)
+        goman = next_hash.startswith("PHH")
+        if goman:
+            self.pgoApi.activate_hash_server(next_hash, go_hash=True, gohash_endpoint = 'http://hash.gomanager.biz')
         else:
-            self.pgoApi.activate_hash_server(next(self.hash_generator), hash_endpoint=hash_endpoint)
+            self.pgoApi.activate_hash_server(next_hash, go_hash=False, hash_endpoint = 'http://pokehash.buddyauth.com')
 
         if self.ptc_proxy_supplier is not None:
             self.current_ptc_proxy = self.ptc_proxy_supplier(self.current_ptc_proxy)

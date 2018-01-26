@@ -284,7 +284,7 @@ class CatchManager(object):
         encounter_response = await self.worker.do_encounter_pokemon(encounter_id, spawn_point_id, pos)
         probability = EncounterPokemon(encounter_response, encounter_id).probability()
         is_vip = pokemon_id in self.candy12 or pokemon_id in self.candy25
-        if probability and len([x for x in probability.capture_probability if x > 0.38]) > 0:
+        if probability and len([x for x in probability.capture_probability if x > 0.40]) > 0:
             caught = await beh_catch_encountered_pokemon(self.worker, pos, encounter_id, spawn_point_id, probability,
                                                    pokemon_id, is_vip, fast)
             return caught

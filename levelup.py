@@ -94,8 +94,15 @@ async def safe_levelup(forced_update_):
                         account_file = "account{}.csv".format(str(counter))
                         counter += 1
                         cmd_to_use = args.at_end_command.replace("$1", account_file)
+                        cmd_to_use = [
+                            "python3",
+                            "Monkey/scripts/import_accounts.py",
+                            account_file,
+                            "--level = 30"
+                        ]
+                        args.at_end_command.replace("$1", account_file)
                         write_monocle_accounts_file([worker.account_info()], account_file)
-                        worker.log.info("Running shell command {}".format(cmd_to_use))
+                        worker.log.info("Running shell command {}",cmd_to_use)
                         process = asyncio.create_subprocess_exec(cmd_to_use, loop=loop)
                         await process
         except OutOfAccounts:

@@ -17,7 +17,7 @@ you a lot of headache:
 Basically you say:
 
 ```
-python3 allocateAccount.py --max-level=31 --min-level=30 --count=400 --format=monocle --accountcsv=accounts.csv
+python3 allocateAccounts.py --max-level=31 --min-level=30 --count=400 --format=monocle --accountcsv=accounts.csv
 ```
 
 The idea is that you run this inside your monocle/rocketmap installation and it actually allocates 400 accounts and

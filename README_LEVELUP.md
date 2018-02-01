@@ -7,7 +7,7 @@ ShuckleTools only supports MySQL
 
 If double xp events are running the "fast-levelup" flag can be used, optionally also the "non-stop" flag will run until all accounts are at desired level. 
 
-The sample config in the config folder is optimal.
+The sample config in the config folder is optimal. ~/ShuckleTools/config/levelup.ini
 
 Basic Installation 
 -------
@@ -16,13 +16,17 @@ These instructions cover an installation from the develop branch in git.
 git clone https://github.com/ShuckleTools/ShuckleTools.git
 ```
 
+now run 
 
 ```
-sudo -H pip install -r requirements.txt
+pip3 install -r requirements.txt --upgrade
 ```
 
-Basic Launching
+cp ~/ShuckleTools/config/levelup.ini.example to levelup.ini, modify as appropriate
 
+Create Database or Tables in an existing RocketMap or Monocle DB the schema is located at https://github.com/ShuckleHQ/database_scripts.md
+
+**Basic Launching**
 
 Copy /ShuckleTools/config/levelup.ini.example to levelup.ini, modify as appropriate
 
@@ -31,7 +35,7 @@ Navigate to ./ShuckleTools/ and run
 ```
 pip3 install -r requirements.txt --upgrade
 ```
-Create Database or Tables in an existing RocketMap or Monocle DB the schema is located at https://github.com/ShuckleHQ/RocketMap/blob/develop/database_scripts.md
+
 
 
 Loading Accounts into the Database 

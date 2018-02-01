@@ -35,7 +35,11 @@ Load Accounts into the Accounts table
 ~/ShuckleTools/bin/loadAccounts accountsfile.txt --system-id=your-bot-system-id
 ```
 
-Using levelUp:
+Basic Lauching
+--------
+
+You should be able to start using the application, make sure you’re in the directory of ShuckleTools then:
+
 ```
 nohup levelUp &
 ```
@@ -46,7 +50,7 @@ Log output is written to a log file called [system-id].log
 grep XP <logfile> | grep bot-2] | grep XP | less
 ```
 
-Will give you somethung like this (note the square bracket after 2 to diffrentiate bot-2 from bot-21:
+Will give you something like this (note the square bracket after 2 to diffrentiate bot-2 from bot-21:
 
 ```
 2017-11-25 16:35:00,245 [       bot-2][  stopmanager][    INFO][1840258] P1L21, 134S/106P//R0.79, 8E/1EW, 263620XP/260420@30minH, 0S@30min. idx=52, 918 hash

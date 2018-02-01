@@ -1,14 +1,12 @@
-Tools for rocketmap
+ShuckleTools Tools
 ===================
 
 These tools do not require that you run rocketmap, but are based on rocketmap code. The overall api compliance
-of these tools should be fairly similar to RocketMap since it uses actual RocketMap code. This compliance has gotten
-to be quite good.
+of these tools should be fairly similar to RocketMap since it uses actual RocketMap code. 
 
 You might put the "bin" subfolder of your checkout in your path. If your checkout is /home/username/RocketMap you can add /home/username/RocketMap/bin to your path.
 
-Levelup docs are here Database schema is located at https://github.com/ShuckleHQ/RocketMap/blob/develop/README_LEVELUP.md
-
+Levelup docs are here Database schema is located at https://github.com/ShuckleHQ/ShuckleTools/README_LEVELUP.md
 
 Large scale lure dumper
 ===========

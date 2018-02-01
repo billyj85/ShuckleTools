@@ -1,20 +1,29 @@
 Welcome to ShuckleTools Documentation!
 =========
 
-Effectively bring accounts to a level 5/20/30 by looting pokestops and catching pokemon at a predefined set of locations. Not really many config options. 
-When double xp events are running the "fast-levelup" flag should be used, optionally also the "non-stop" flag will run until all accounts are at desired level. 
-The sample config in the config folder is optimal.
-
-Setting Up
--------
+The following guide will assist in understanding how to use LevelUp.py which effectively brings accounts to a level of 5/20/30. This is done by looting pokestops and catching pokemon at a predefined set of locations with minimal config options. 
 
 ShuckleTools only supports MySQL
 
-Clone ShuckleTools  
+If double xp events are running the "fast-levelup" flag can be used, optionally also the "non-stop" flag will run until all accounts are at desired level. 
+
+The sample config in the config folder is optimal.
+
+Basic Installation 
+-------
+These instructions cover an installation from the develop branch in git.
+```
+git clone https://github.com/ShuckleTools/ShuckleTools.git
+```
+
 
 ```
-git clone --
+sudo -H pip install -r requirements.txt
 ```
+
+Basic Launching
+
+
 Copy /ShuckleTools/config/levelup.ini.example to levelup.ini, modify as appropriate
 
 Navigate to ./ShuckleTools/ and run

@@ -10,7 +10,7 @@ gmaps-key: your-gmaps-key
 hash-key: your-bossland-key
 #accountcsv: acounts.txt
 system-id: levelup-bot
-# legal routes are hamburg
+# routes are hamburg 
 route: hamburg
 proxy-file: proxies.txt
 # default threads is 5. Dont go above 7 per IP or you'll get bans
